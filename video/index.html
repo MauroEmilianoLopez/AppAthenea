@@ -88,6 +88,8 @@
     </div>
     <div class="controls">
       <button id="play" aria-label="Play">▶</button>
+      <button id="back" aria-label="Go back 5 seconds">Back 5s</button>
+      <button id="restart" aria-label="Restart from the beginning">Restart</button>
       <input type="range" id="seek" min="0" max="300" value="0" aria-label="Video position">
       <span id="time">0:00 / 0:30</span>
       <button id="cc" aria-pressed="true" aria-label="Subtitles in Spanish">CC ES</button>
@@ -671,7 +673,7 @@ if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
 // Sync: the picture never runs ahead of the voice. Each line speaks during its scene window; if the voice
 // is still talking when the next line is due, the picture holds its last frame until the line ends.
 // The shorter script fits the 30-second timeline at a natural, constant speaking rate.
-let speaking = -1, speakStart = 0;
+let speaking = -1, speakStart = 0, narrationGeneration = 0;
 const lineWindow = i => (i + 1 < NARRATION.length ? NARRATION[i + 1][0] : DUR) - NARRATION[i][0];
 function narrate() {
   if (!synth || !voiceOn || !playing || speaking >= 0) return;
@@ -681,9 +683,10 @@ function narrate() {
   const u = new SpeechSynthesisUtterance(NARRATION[i][1]);
   if (narrator) u.voice = narrator;
   u.lang = 'en-US'; u.rate = 1;
-  u.onstart = () => { speakStart = performance.now(); };
+  const generation = narrationGeneration;
+  u.onstart = () => { if (generation === narrationGeneration) speakStart = performance.now(); };
   u.onend = u.onerror = () => {
-    if (speaking !== i) return;
+    if (generation !== narrationGeneration || speaking !== i) return;
     speaking = -1;
   };
   speaking = i; speakStart = performance.now();
@@ -697,6 +700,7 @@ function voiceHold() {
   return next - .05;
 }
 function resetNarration() {
+  narrationGeneration++;
   speaking = -1;
   if (synth) synth.cancel();
   spoken = new Set(NARRATION.map(([at], i) => at < t - .4 ? i : -1).filter(i => i >= 0));
@@ -788,7 +792,7 @@ const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2,
 const chapterBtns = SCENES.map(s => {
   const b = document.createElement('button');
   b.innerHTML = `<b>${fmt(s.t)}</b>${s.name}`;
-  b.onclick = () => { closeTip(); hideEnd(); seek(s.t + .01); play(); };
+  b.onclick = () => { closeTip(); hideEnd(); pause(); seek(s.t + .01); play(); };
   $('chapters').appendChild(b); return b;
 });
 function ui() {
@@ -799,7 +803,16 @@ function ui() {
   const i = sceneAt(t); chapterBtns.forEach((b, j) => b.classList.toggle('on', j === i));
 }
 function hideEnd() { clearTimeout(endTimer); $('end').hidden = true; }
-function seek(v) { t = clamp(v, 0, DUR); resetNarration(); if (playing) startMusic(t); render(t); ui(); }
+function seek(v) {
+  t = clamp(v, 0, DUR);
+  resetNarration();
+  if (playing) {
+    startMusic(t);
+    // Rewind buttons are user gestures too; restart the voice before Safari loses the gesture.
+    narrate();
+  }
+  render(t); ui();
+}
 function play() {
   if (t >= DUR) seek(0);
   resetNarration(); startMusic(t); hideEnd();
@@ -842,6 +855,8 @@ cv.addEventListener('mousemove', e => { cv.style.cursor = !recorder && hit(...ca
 cv.addEventListener('click', e => { if (recorder) return; const h = hit(...canvasPoint(e)); h ? openTip(h.id) : toggle(); });
 
 $('play').onclick = toggle;
+$('back').onclick = () => { if (recorder) return; closeTip(); hideEnd(); seek(t - 5); };
+$('restart').onclick = () => { if (recorder) return; closeTip(); hideEnd(); seek(0); };
 $('seek').oninput = e => { closeTip(); hideEnd(); pause(); seek(e.target.value / 10); };
 $('cc').onclick = () => { cc = !cc; $('cc').setAttribute('aria-pressed', cc); render(t); };
 if (!synth) { $('vo').hidden = true; $('voNote').textContent = 'This browser has no speech synthesis, so the voice narration is not available.'; }
