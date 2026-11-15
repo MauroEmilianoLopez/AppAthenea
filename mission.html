@@ -64,6 +64,9 @@
   .hab-icon { background: var(--ok); border: 3px solid #fff; border-radius: 6px; width: 22px !important; height: 22px !important; box-shadow: 0 0 0 2px #000; }
   .st-icon { background: var(--accent); color: #1d0e05; font: 700 12px var(--font); border: 2px solid #fff; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 0 2px #000; }
   .nav { color: var(--info); font-size: 13px; text-decoration: none; margin-left: auto; }
+  .quick-start ol { margin: 0; padding-left: 20px; display: grid; gap: 7px; font-size: 13px; }
+  .quick-start a { color: var(--info); }
+  .quick-start .links { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; }
   @media (max-width: 800px) {
     html, body { height: auto; }
     body { min-height: 100dvh; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto clamp(280px, 45dvh, 480px) auto; }
@@ -86,9 +89,26 @@
   <div class="chip" id="c-dose"><span>EVA dose</span><b>—</b></div>
   <div class="chip" id="c-sw"><span>Space weather</span><b>—</b></div>
   <div class="chip" id="c-sun"><span>Daylight</span><b>—</b></div>
+  <a class="nav" href="#quick-start">How to use ↓</a>
 </header>
 
 <aside>
+  <details id="quick-start" class="quick-start" open>
+    <summary>Start here · 1 minute</summary>
+    <div class="body">
+      <div>Plan a future science walk across Jezero Crater and return to base.</div>
+      <ol>
+        <li>Choose science stops below. The green square is your base; the orange circles are stops. Drag them to explore another plan.</li>
+        <li>Press <b>Calculate EVA</b> to review the route, time, distance, return reserve, and alerts.</li>
+        <li>Adjust suit settings or choose <b>Obstacle</b>, mark a spot on the map, and calculate again. Compare the faster and gentler routes.</li>
+        <li>Open <b>Data quality</b> to see the source resolution and planning assumptions.</li>
+      </ol>
+      <div class="links">
+        <a href="demo.html">Watch the 30-second demo</a>
+        <a href="https://github.com/MauroEmilianoLopez/AppAthenea#readme" target="_blank" rel="noopener noreferrer">Full guide and source code ↗</a>
+      </div>
+    </div>
+  </details>
   <details open>
     <summary>Science objectives</summary>
     <div class="body">
