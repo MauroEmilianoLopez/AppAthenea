@@ -15,6 +15,12 @@ npm start
 
 Athenea opens directly in the Jezero EVA planner. The first installation needs an Internet connection. See [DESKTOP.md](DESKTOP.md) for packaging and offline behavior.
 
+## Deploy the web version
+
+The Vercel configuration builds an allowlisted static site with `npm run build:web`. Its root page is the Jezero EVA planner; `/map.html` is the secondary Jezero map. Only the files in `web-dist/` are served, so the Electron runtime, build tools, and local diagnostics are not published as website assets.
+
+Connect this repository to a Vercel project with the **Other** framework preset. The checked-in `vercel.json` sets the install command, build command, and output directory. NASA Mars Trek imagery/elevation and weather feeds still require Internet access; the web deployment is not an offline copy.
+
 ## Use the planner
 
 1. Select one or more science stops on the Jezero mission screen.

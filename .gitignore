@@ -3,5 +3,7 @@ video/music/
 node_modules/
 vendor/leaflet/
 dist/
+web-dist/
+.vercel/
 diag-electron-report.txt
 diag-electron.ps1

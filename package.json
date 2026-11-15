@@ -6,6 +6,7 @@
   "main": "desktop/main.cjs",
   "scripts": {
     "prepare:desktop": "node scripts/prepare-desktop-assets.cjs",
+    "build:web": "node scripts/build-web.cjs",
     "start": "npm run prepare:desktop && electron .",
     "package:win": "npm run prepare:desktop && electron-builder --win nsis"
   },
