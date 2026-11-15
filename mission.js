@@ -340,7 +340,12 @@ async function fetchElevation(nx, ny) {
 }
 async function buildTerrain() {
   const nx = Math.ceil((BBOX.e - BBOX.w) / CELL_DEG), ny = Math.ceil((BBOX.n - BBOX.s) / CELL_DEG);
-  const { raw, bytes } = await fetchElevation(nx, ny);
+  const { raw, bytes } = M.dem.coarse && /^https?:$/.test(location.protocol)
+    ? await import('./web-terrain.mjs').then(({ fetchCoarseElevation }) => fetchCoarseElevation({
+      bbox: BBOX, nx, ny, cellDeg: CELL_DEG,
+      endpoint: `${TREK_IMG}/${M.dem.service}/ImageServer`, timeoutMs: TERRAIN_TIMEOUT_MS,
+    }))
+    : await fetchElevation(nx, ny);
   const E = blur(raw, nx, ny);
   const S = new Float32Array(nx * ny).fill(NaN);
   const dx = CELL_M * Math.cos(MID_LAT * toRad), dy = CELL_M;
