@@ -800,7 +800,14 @@ function ui() {
 }
 function hideEnd() { clearTimeout(endTimer); $('end').hidden = true; }
 function seek(v) { t = clamp(v, 0, DUR); resetNarration(); if (playing) startMusic(t); render(t); ui(); }
-function play() { if (t >= DUR) seek(0); resetNarration(); startMusic(t); hideEnd(); playing = true; last = performance.now(); ui(); }
+function play() {
+  if (t >= DUR) seek(0);
+  resetNarration(); startMusic(t); hideEnd();
+  playing = true; last = performance.now();
+  // iOS Safari requires the first speak() call inside the user's tap/click handler.
+  narrate();
+  ui();
+}
 function pause() { playing = false; if (synth) synth.cancel(); stopMusic(); ui(); }
 function toggle() { playing ? pause() : (closeTip(), play()); }
 function loop(now) {
@@ -838,7 +845,13 @@ $('play').onclick = toggle;
 $('seek').oninput = e => { closeTip(); hideEnd(); pause(); seek(e.target.value / 10); };
 $('cc').onclick = () => { cc = !cc; $('cc').setAttribute('aria-pressed', cc); render(t); };
 if (!synth) { $('vo').hidden = true; $('voNote').textContent = 'This browser has no speech synthesis, so the voice narration is not available.'; }
-$('vo').onclick = () => { voiceOn = !voiceOn; $('vo').setAttribute('aria-pressed', voiceOn); $('vo').textContent = voiceOn ? '🔊 Voice' : '🔇 Voice'; resetNarration(); };
+$('vo').onclick = () => {
+  voiceOn = !voiceOn;
+  $('vo').setAttribute('aria-pressed', voiceOn);
+  $('vo').textContent = voiceOn ? '🔊 Voice' : '🔇 Voice';
+  resetNarration();
+  if (voiceOn && playing) narrate();
+};
 if (!(window.AudioContext || window.webkitAudioContext)) $('mu').hidden = true;
 $('mu').onclick = () => { musicOn = !musicOn; $('mu').setAttribute('aria-pressed', musicOn); $('mu').textContent = musicOn ? '♪ Music' : '♪̸ Music'; if (!musicOn) stopMusic(); else if (playing) startMusic(t); };
 $('muFile').onchange = async e => {
