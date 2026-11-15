@@ -64,7 +64,14 @@
   .hab-icon { background: var(--ok); border: 3px solid #fff; border-radius: 6px; width: 22px !important; height: 22px !important; box-shadow: 0 0 0 2px #000; }
   .st-icon { background: var(--accent); color: #1d0e05; font: 700 12px var(--font); border: 2px solid #fff; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 0 2px #000; }
   .nav { color: var(--info); font-size: 13px; text-decoration: none; margin-left: auto; }
-  @media (max-width: 800px) { body { grid-template-columns: 1fr; grid-template-rows: auto 55vh auto; } aside { grid-row: 3; border-right: 0; } }
+  @media (max-width: 800px) {
+    html, body { height: auto; }
+    body { min-height: 100dvh; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto clamp(280px, 45dvh, 480px) auto; }
+    aside { grid-row: 3; overflow: visible; border-right: 0; min-width: 0; }
+    summary, label.chk, .st button { min-height: 44px; }
+    .st { grid-template-columns: 28px minmax(0, 1fr) auto; }
+    .st input, label.chk input { width: 24px; height: 24px; }
+  }
 </style>
 </head>
 <body>
