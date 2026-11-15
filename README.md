@@ -17,7 +17,7 @@ Athenea opens directly in the Jezero EVA planner. The first installation needs a
 
 ## Deploy the web version
 
-The Vercel configuration builds an allowlisted static site with `npm run build:web`. Its root page is the Jezero EVA planner; `/map.html` is the secondary Jezero map. Only the files in `web-dist/` are served, so the Electron runtime, build tools, and local diagnostics are not published as website assets.
+The Vercel configuration builds an allowlisted static site with `npm run build:web`. Its root page is the Jezero EVA planner; `/map.html` is the secondary Jezero map and `/demo.html` is the 30-second interactive project demonstration. Only the files in `web-dist/` are served, so the Electron runtime, build tools, and local diagnostics are not published as website assets.
 
 Connect this repository to a Vercel project with the **Other** framework preset. The checked-in `vercel.json` sets the install command, build command, and output directory. NASA Mars Trek imagery/elevation and weather feeds still require Internet access; the web deployment is not an offline copy.
 

@@ -21,13 +21,13 @@
   header p { margin: 2px 0 14px; color: var(--muted); font-size: 13px; }
   .player { position: relative; background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 30px rgba(0,0,0,.25); }
   canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; cursor: pointer; }
-  .controls { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #120d0b; color: #f1e6e0; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 12px; background: #120d0b; color: #f1e6e0; }
   .controls button { font: inherit; background: transparent; color: inherit; border: 1px solid #3b2e29; border-radius: 6px; padding: 4px 10px; cursor: pointer; min-width: 40px; }
   .controls button:hover, .controls button[aria-pressed="true"] { border-color: #e5733f; }
   .controls button:focus-visible { outline: 2px solid #e5733f; outline-offset: 1px; }
   #seek { flex: 1; accent-color: #e5733f; min-width: 80px; }
   #time { font: 12px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .chapters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+  .chapters { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
   .chapters button { font: inherit; font-size: 13px; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; min-width: 0; }
   .chapters button b { display: block; font: 600 12px var(--mono); color: var(--accent); }
   .chapters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -51,7 +51,7 @@
   .end .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .end .row a { background: transparent; }
   [hidden] { display: none !important; }
-  @media (max-width: 760px) { .chapters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .chapters { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 640px) {
     .tip { position: static; max-width: none; border-radius: 0; }
     .end { position: static; transform: none; width: auto; border-radius: 0; }
@@ -62,19 +62,19 @@
 <body>
 <main>
   <header>
-    <h1>Do you think you could survive on the Red Planet? With ATHENEA, we make your survival easier.</h1>
-    <p>NASA Space Apps demo · 30-second interactive video. Tap the glowing points to learn more; the video pauses while you read.</p>
+    <h1>Interplanetary Survival Guide: Martian Map</h1>
+    <p>ATHENEA · 30-second interactive demo. Tap the glowing points to learn more; the video pauses while you read.</p>
   </header>
 
   <div class="player" id="player">
-    <canvas id="cv" width="1280" height="720" aria-label="Demo: the team, the challenge, the Athenea solution, how it works and its future"></canvas>
+    <canvas id="cv" width="1280" height="720" aria-label="Demo: one wrong turn on Mars, the hazards, ATHENEA and how it plans a safe route"></canvas>
     <div class="tip" id="tip" hidden role="dialog" aria-live="polite">
       <h3 id="tipTitle"></h3>
       <p id="tipText"></p>
       <button id="tipGo">Continue the video</button>
     </div>
     <div class="end" id="end" hidden>
-      <h3>Quick check: what does Athenea verify at every stop?</h3>
+      <h3>Quick check: what does ATHENEA verify at every stop?</h3>
       <div class="opts" id="quiz">
         <button data-ok="0">Only the distance to the next stop</button>
         <button data-ok="1">Whether you can still walk back to base with time to spare</button>
@@ -83,14 +83,14 @@
       <div class="msg" id="quizMsg"></div>
       <div class="row">
         <button id="again">Watch again</button>
-        <a href="../mission.html?m=gale">Open Athenea</a>
+        <a href="../mission.html?m=jezero">Open Athenea</a>
       </div>
     </div>
     <div class="controls">
       <button id="play" aria-label="Play">▶</button>
       <input type="range" id="seek" min="0" max="300" value="0" aria-label="Video position">
       <span id="time">0:00 / 0:30</span>
-      <button id="cc" aria-pressed="true" aria-label="Subtitles">CC</button>
+      <button id="cc" aria-pressed="true" aria-label="Subtitles in Spanish">CC ES</button>
       <button id="vo" aria-pressed="true" aria-label="Voice narration">🔊 Voice</button>
       <button id="mu" aria-pressed="true" aria-label="Background music">♪ Music</button>
       <button id="fs" aria-label="Full screen">⛶</button>
@@ -100,200 +100,74 @@
   <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
 
   <div class="extras">
-    <span id="seen">Points discovered: 0 / 10</span>
+    <span id="seen">Points discovered: 0 / 12</span>
     <span id="muSrc">Music: loading…</span>
     <label style="cursor:pointer;text-decoration:underline">Choose music file<input type="file" id="muFile" accept="audio/*" hidden></label>
-    <span id="voNote">Voice: English narration from your browser. The recorded file keeps the music; to keep the voice too, record the screen with sound (Windows: Win + Alt + R). Only publish music you have the rights to use.</span>
     <button id="rec">Record as a video file</button>
     <span id="recMsg"></span>
+    <span id="voNote">Voice: English narration from your browser. The recorded file keeps the music; to keep the voice too, record the screen with sound (Windows: Win + Alt + R). Only publish music you have the rights to use.</span>
   </div>
 </main>
 
 <script>
-// ---------- Team (edit these to show your names in the video) ----------
+// ---------- Team ----------
 const TEAM = {
   name: 'ATHENEA',
   place: 'San Luis, Argentina',
   members: ['Emiliano López', 'Micaela Cisneros', 'Brisa Carrizo', 'Gisela Tanúz', 'Maira Condori'],
 };
-const SLOGAN = {
-  question: 'Do you think you could survive on the Red Planet?',
-  answer: 'With ATHENEA, we make your survival easier.',
-  tagline: 'Space reach guaranteed.',
-};
 
 const W = 1280, H = 720, DUR = 30;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 
-// Structure required for NASA Space Apps demo videos.
-// t: start time (s); slot: timestamp shown on the chapter button.
-const SCENES = [
-  { t: 0,  slot: '0:00', name: 'Meet the team' },
-  { t: 2,  slot: '0:02', name: 'The challenge' },
-  { t: 5,  slot: '0:05', name: 'Our solution' },
-  { t: 10, slot: '0:10', name: 'How it works' },
-  { t: 20, slot: '0:20', name: 'The future' },
+// ---------- script: the team's pitch, read by the voice and shown as subtitles ----------
+// [start (s), line]. Times follow the expected speaking pace; lines queue, so the voice never overlaps itself.
+const NARRATION = [
+  [0,    'On Mars, one wrong turn matters.'],
+  [2.9,  'What if explorers had a copilot?'],
+  [6.6,  'Thin air, brutal cold, dust, and unpredictable terrain.'],
+  [11.2, 'Every step calls for a decision.'],
+  [14.4, 'Meet ATHENEA, built for future Mars exploration.'],
+  [18,   'Powered by NASA data, it reads terrain and weather, compares routes, estimates resources, and helps crews plan their journey and return to base.'],
+  [27.8, 'ATHENEA. Your Mars copilot.'],
 ];
+// Subtitles in Spanish (the voice stays in English). Same order and timing as NARRATION.
+const SUBS_ES = [
+  'En Marte, un giro equivocado importa.',
+  '¿Y si los exploradores contaran con un copiloto?',
+  'Aire escaso, frío brutal, polvo y terreno impredecible.',
+  'Cada paso exige una decisión.',
+  'Conoce ATHENEA, creada para la futura exploración de Marte.',
+  'Con datos de la NASA, analiza el terreno y el clima, compara rutas, estima recursos y ayuda a planificar el recorrido y el regreso a la base.',
+  'ATHENEA. Tu copiloto en Marte.',
+];
+const SUBS = NARRATION.map(([a], i) => [a, i + 1 < NARRATION.length ? NARRATION[i + 1][0] : DUR, SUBS_ES[i]]);
 
-const SUBS = [
-  [0, 2, SLOGAN.question],
-  [2, 5, 'Our challenge: a map an astronaut can use while exploring Mars.'],
-  [5, 10, `${SLOGAN.answer} ${SLOGAN.tagline}`],
-  [10, 15, 'Pick science stops; the route avoids steep slopes and obstacles.'],
-  [15, 20, 'Seven NASA data sets estimate time, oxygen, dose and when to turn back.'],
-  [20, 30, 'Next: safer EVAs at any site, on Mars, the Moon and beyond.'],
+// Scenes follow the script. t: start (s); id is used for scene-specific effects.
+const SCENES = [
+  { t: 0,    id: 'hook',     name: 'Meet the team',  draw: sHook },
+  { t: 2.9,  id: 'question', name: 'The question',   draw: sQuestion },
+  { t: 6.6,  id: 'problem',  name: 'The problem',    draw: sProblem },
+  { t: 14.4, id: 'meet',     name: 'Meet ATHENEA',   draw: sMeet },
+  { t: 18,   id: 'how',      name: 'How it works',   draw: sHow },
+  { t: 27.8, id: 'close',    name: 'The future',     draw: sClose },
 ];
 
 const TIPS = {
-  team: ['Who we are', `Team ${TEAM.name} from ${TEAM.place}${TEAM.members.length ? ': ' + TEAM.members.join(', ') : ''}. We built Athenea for the NASA Space Apps Challenge.`],
-  challenge: ['The challenge', 'Create a map, tool or interface a Martian astronaut can use during a surface exploration mission, combining at least three types of NASA data and putting crew safety first. We were inspired by the boxwork ridges Curiosity studied on Mount Sharp in 2025.'],
-  problem: ['The problem', 'On foot, in a suit, carrying tools and far from the base, an astronaut has to know where it is safe to walk, how long each stop takes and when to turn back.'],
-  users: ['Who benefits', 'Astronauts during the EVA, mission planners preparing the day, and scientists who choose the stops and their objectives.'],
-  opportunity: ['The opportunity', 'Crewed missions to Mars are being planned for the coming decades, and the Artemis program will put people back on the Moon first. The same planning logic applies to both.'],
-  data: ['Seven NASA data sets', 'Optical: HiRISE and CTX. Topographic: HiRISE terrain model. Thermal: THEMIS night infrared. In situ: Curiosity and Perseverance traverses with measured tilt. Radiation: RAD. Space weather: DONKI. Weather: REMS and MEDA.'],
-  route: ['A route you can walk', 'Athenea searches the terrain grid for the fastest walking path in a suit, forbids slopes above the limit (15° by default) and avoids obstacles the crew marks. It also offers a gentler alternative.'],
-  return: ['Why head back', 'At every stop Athenea compares the EVA time left with the walk back to base plus a reserve. If the margin runs out, it shows MANDATORY RETURN.'],
-  scale: ['Any landing site', 'Each mission is one profile in missions.js: area, layers, elevation, rover data and stops. We already include Mount Sharp (Gale) and the Jezero delta.'],
-  beyond: ['Beyond Mars', 'The same tool could plan Artemis moonwalks, and on Earth it could help field geologists and rescue teams plan safe walks in remote terrain.'],
+  wrongturn: ['Why one wrong turn matters', 'A steep slope, loose sand or a hidden drop can injure an astronaut or damage the suit, far from help. Choosing the route is a safety decision.'],
+  team: ['Who we are', `Team ${TEAM.name} from ${TEAM.place}: ${TEAM.members.join(', ')}. We built ATHENEA for the NASA Space Apps Challenge.`],
+  copilot: ['A copilot, not an autopilot', 'ATHENEA is designed for a suit display or a rover screen. In this prototype it runs in a software and recommends; the crew always decides.'],
+  pressure: ['Thin air', "Perseverance's MEDA station measures about 700–780 Pa at Jezero: less than 1% of the air pressure at sea level on Earth."],
+  cold: ['Brutal cold', "MEDA recorded air near suit height from about −82 °C before dawn to about −15 °C in the warmest afternoons."],
+  dust: ['Dust everywhere', 'Fine dust sticks to suits, wears seals and covers solar panels. A regional storm can cut light and power for days.'],
+  terrain: ['Terrain that never plays fair', 'Slopes, loose sand, boulders and layered rock in the Jezero delta. ATHENEA uses NASA elevation models to avoid the steepest ground.'],
+  data: ['Seven NASA data sets', 'Optical: HiRISE and CTX. Topographic: terrain models. Thermal: THEMIS. In situ: Curiosity and Perseverance traverses. Radiation: RAD. Space weather: DONKI. Weather: REMS and MEDA.'],
+  route: ['The safest route', 'ATHENEA searches the terrain for the fastest walking path in a suit, rejects slopes above the limit (15° by default) and avoids obstacles the crew marks.'],
+  vitals: ['Vitals and food reserves', 'The prototype already estimates oxygen, water and food for each walk. Reading live vital signs from the suit is the next step of the project.'],
+  return: ['Time to return', 'At every stop ATHENEA compares the time left with the walk back to base plus a reserve. If the margin runs out, it shows MANDATORY RETURN.'],
+  future: ['Where it goes next', 'Any landing site is one new mission profile. The same planning could support Artemis moonwalks and field work in remote places on Earth.'],
 };
 const TIP_TOTAL = Object.keys(TIPS).length;
-
-// ---------- voice narration (browser speech synthesis) ----------
-// [start time (s), line]. Lines are timed so the whole script fits in 30 s; a line that runs long simply queues.
-const NARRATION = [
-  [0, `${SLOGAN.question} ${SLOGAN.answer} ${SLOGAN.tagline}`],
-  [7, 'Our challenge: a map astronauts can use while exploring Mars.'],
-  [11, 'Pick your science stops. The route avoids steep slopes and obstacles,'],
-  [15.5, 'and seven NASA data sets estimate time, oxygen, radiation, and when to turn back.'],
-  [21, 'Next: safer walks at any landing site, on Mars, the Moon, and beyond.'],
-  [26.5, 'Athenea. Plan every step.'],
-];
-const synth = window.speechSynthesis || null;
-let voiceOn = !!synth, narrator = null, spoken = new Set();
-function pickVoice() {
-  const vs = synth.getVoices().filter(v => /^en[-_]/i.test(v.lang));
-  narrator = vs.find(v => /natural|online/i.test(v.name) && /en[-_]US/i.test(v.lang))
-    || vs.find(v => /Google US English/i.test(v.name))
-    || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
-}
-if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
-function narrate() {
-  if (!synth || !voiceOn || !playing) return;
-  NARRATION.forEach(([at, line], i) => {
-    if (t < at || spoken.has(i)) return;
-    spoken.add(i);
-    const u = new SpeechSynthesisUtterance(line);
-    if (narrator) u.voice = narrator;
-    u.lang = 'en-US'; u.rate = 1.08;
-    synth.speak(u);
-  });
-}
-// ---------- original ambient space music (generated live with Web Audio) ----------
-// Slow organ-like pads over a low drone, with soft high "star" notes and a long reverb.
-// Original composition made for this demo; it does not reproduce any existing soundtrack.
-const CHORDS = [ // [start (s), MIDI notes] — 4 chords of 7.5 s cover the 30 s video
-  [0,    [45, 52, 57, 60, 64]],  // A minor
-  [7.5,  [41, 48, 57, 60, 65]],  // F major (add A)
-  [15,   [48, 55, 60, 64, 67]],  // C major
-  [22.5, [43, 50, 59, 62, 67]],  // G major
-];
-const STAR_NOTES = [76, 79, 81, 84, 88];
-const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
-let musicOn = true, ac = null, master = null, musicDest = null, bus = null;
-function audioSetup() {
-  if (ac) return;
-  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-  ac = new AC();
-  master = ac.createGain(); master.gain.value = 0.16;
-  // generated reverb impulse (decaying noise)
-  const len = ac.sampleRate * 3.5, ir = ac.createBuffer(2, len, ac.sampleRate);
-  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
-  const verb = ac.createConvolver(); verb.buffer = ir;
-  const wet = ac.createGain(); wet.gain.value = 0.55;
-  master.connect(ac.destination); master.connect(verb); verb.connect(wet); wet.connect(ac.destination);
-  // the same mix goes to a stream so the recorder can include the music
-  musicDest = ac.createMediaStreamDestination();
-  master.connect(musicDest); wet.connect(musicDest);
-  // a music file plays through its own path, without the generated reverb
-  direct = ac.createGain(); direct.gain.value = 0.55;
-  direct.connect(ac.destination); direct.connect(musicDest);
-}
-
-// ---------- optional music file ----------
-// If video/music/soundtrack.mp3 exists it replaces the generated score. That folder is in .gitignore:
-// copyrighted tracks stay on this computer and are never committed or published with the repository.
-const MUSIC_FILE = 'music/soundtrack.mp3';
-const MUSIC_START = 70; // seconds into the track where the video's music begins (the first minute of soundtrack.mp3 is very quiet)
-let direct = null, fileBuffer = null, fileLabel = '';
-async function useMusicBytes(bytes, label) {
-  audioSetup(); if (!ac) return;
-  fileBuffer = await ac.decodeAudioData(bytes);
-  fileLabel = label;
-  $('muSrc').textContent = `Music: ${label} (local file)`;
-  if (playing) startMusic(t);
-}
-fetch(MUSIC_FILE).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
-  .then(b => useMusicBytes(b, 'soundtrack.mp3'))
-  .catch(() => { $('muSrc').textContent = 'Music: original ambient score'; });
-function pad(out, freq, start, end, level) {
-  const g = ac.createGain(), f = ac.createBiquadFilter();
-  f.type = 'lowpass'; f.frequency.value = 1100; f.Q.value = .4;
-  g.gain.setValueAtTime(0, start);
-  g.gain.linearRampToValueAtTime(level, start + 2.2);
-  g.gain.setValueAtTime(level, Math.max(start + 2.2, end - 2.5));
-  g.gain.linearRampToValueAtTime(0, end);
-  f.connect(g); g.connect(out);
-  [-6, 0, 6].forEach(det => {
-    const o = ac.createOscillator(); o.type = det ? 'sawtooth' : 'triangle'; o.frequency.value = freq; o.detune.value = det;
-    o.connect(f); o.start(start); o.stop(end + .1);
-  });
-}
-function star(out, freq, start) {
-  const o = ac.createOscillator(), g = ac.createGain();
-  o.type = 'sine'; o.frequency.value = freq;
-  g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(.05, start + .05); g.gain.exponentialRampToValueAtTime(.0005, start + 2.5);
-  o.connect(g); g.connect(out); o.start(start); o.stop(start + 2.6);
-}
-// Schedules the music from video time `from` to the end of the video.
-function startMusic(from) {
-  stopMusic(.05);
-  if (!musicOn) return;
-  audioSetup(); if (!ac) return;
-  if (ac.state === 'suspended') ac.resume();
-  const now = ac.currentTime + .05, at = s => now + Math.max(0, s - from);
-  if (fileBuffer) {
-    bus = ac.createGain(); bus.connect(direct);
-    bus.gain.setValueAtTime(0, now); bus.gain.linearRampToValueAtTime(1, now + (from < .5 ? 1.2 : .3));
-    bus.gain.setValueAtTime(1, at(DUR - 2.5)); bus.gain.linearRampToValueAtTime(0, at(DUR));
-    const src = ac.createBufferSource(); src.buffer = fileBuffer; src.connect(bus);
-    src.start(now, Math.min(fileBuffer.duration - .1, MUSIC_START + from));
-    bus._src = src;
-    return;
-  }
-  bus = ac.createGain(); bus.gain.value = 1; bus.connect(master);
-  CHORDS.forEach(([s, notes], i) => {
-    const e = i + 1 < CHORDS.length ? CHORDS[i + 1][0] + 1.5 : DUR + 1;
-    if (e <= from) return;
-    notes.forEach((m, k) => pad(bus, midiHz(m), at(s), at(e), k === 0 ? .2 : .085));
-    pad(bus, midiHz(notes[0] - 12), at(s), at(e), .12); // low drone
-  });
-  for (let s = 1.5; s < DUR; s += 2.25) if (s >= from) star(bus, midiHz(STAR_NOTES[Math.floor(rnd(s * 10) * STAR_NOTES.length)]), at(s));
-}
-function stopMusic(fade = .4) {
-  if (!bus) return;
-  const b = bus; bus = null;
-  b.gain.cancelScheduledValues(ac.currentTime);
-  b.gain.setValueAtTime(b.gain.value, ac.currentTime);
-  b.gain.linearRampToValueAtTime(0, ac.currentTime + fade);
-  if (b._src) b._src.stop(ac.currentTime + fade + .05);
-  setTimeout(() => b.disconnect(), fade * 1000 + 200);
-}
-
-// Stops any speech and marks the lines already passed, so playback resumes from the current scene.
-function resetNarration() {
-  if (synth) synth.cancel();
-  spoken = new Set(NARRATION.map(([at], i) => at < t - .4 ? i : -1).filter(i => i >= 0));
-}
 
 // ---------- utilities ----------
 const rnd = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
@@ -301,6 +175,7 @@ const lerp = (a, b, k) => a + (b - a) * k;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = k => (k = clamp(k), k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
 const easeOut = k => 1 - Math.pow(1 - clamp(k), 3);
+const fadeIn = (lt, at, dur = .4) => clamp((lt - at) / dur);
 const mixc = (a, b, k, al = 1) => `rgba(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')},${al})`;
 function rr(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);
@@ -312,7 +187,6 @@ function text(s, x, y, size, color, opts = {}) {
   ctx.textAlign = opts.align || 'left'; ctx.textBaseline = opts.base || 'alphabetic';
   ctx.fillStyle = color; ctx.fillText(s, x, y);
 }
-// Draws text wrapped to a maximum width; returns the y after the last line.
 function wrap(s, x, y, maxW, size, color, lh = 1.3, weight = 400) {
   ctx.font = `${weight} ${size}px "Segoe UI", system-ui, sans-serif`;
   const words = s.split(' '); let line = '';
@@ -324,7 +198,10 @@ function wrap(s, x, y, maxW, size, color, lh = 1.3, weight = 400) {
   if (line) { text(line, x, y, size, color, { weight }); y += size * lh; }
   return y;
 }
-const fadeIn = (lt, at, dur = .4) => clamp((lt - at) / dur);
+function glowText(s, x, y, size, color, glow, k = 1) {
+  ctx.save(); ctx.shadowColor = glow; ctx.shadowBlur = 30 * k;
+  text(s, x, y, size, color, { weight: 800 }); ctx.restore();
+}
 
 const STARS = Array.from({ length: 220 }, (_, i) => ({ x: rnd(i) * W, y: rnd(i + 500) * H, r: rnd(i + 900) * 1.4 + .3, p: rnd(i + 1300) * 6 }));
 function stars(t, a, maxY = H) {
@@ -333,21 +210,6 @@ function stars(t, a, maxY = H) {
     ctx.fillStyle = `rgba(255,255,255,${a * (.45 + .45 * Math.sin(t * 2 + s.p))})`;
     ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
   }
-}
-function planet(cx, cy, R, lt) {
-  const g = ctx.createRadialGradient(cx - R * .4, cy - R * .4, R * .1, cx, cy, R);
-  g.addColorStop(0, '#ec9a62'); g.addColorStop(.6, '#b9532b'); g.addColorStop(1, '#5a2010');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
-  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip();
-  for (let i = 0; i < 16; i++) {
-    const span = R * 3.2, fx = cx - R * 1.6 + ((rnd(i) * span + lt * 16) % span), fy = cy + (rnd(i + 40) * 2 - 1) * R * .8;
-    ctx.fillStyle = 'rgba(80,25,10,.28)'; ctx.beginPath(); ctx.ellipse(fx, fy, R * (.08 + rnd(i + 9) * .22), R * (.04 + rnd(i + 19) * .08), 0, 0, 7); ctx.fill();
-  }
-  ctx.fillStyle = 'rgba(255,250,245,.85)'; ctx.beginPath(); ctx.ellipse(cx, cy - R * .96, R * .38, R * .1, 0, 0, 7); ctx.fill();
-  const sh = ctx.createRadialGradient(cx - R * .3, cy - R * .3, R * .6, cx, cy, R * 1.05);
-  sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.65)');
-  ctx.fillStyle = sh; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-  ctx.restore();
 }
 
 // ---------- interactive points ----------
@@ -371,12 +233,11 @@ function hotspot(x, y, id, label, t) {
   hot.push({ x, y, r: 34, id });
 }
 
-// ---------- terrain ----------
+// ---------- landscape ----------
 const terrainY = wx => 560 + 8 * Math.sin(wx / 170) + 5 * Math.sin(wx / 53 + 2);
 const DAY = { skyT: [176,112,74], skyB: [231,180,136], far: [170,98,62], mid: [150,74,40], g1: [172,86,46], g2: [120,52,28], rock: [96,44,24] };
 const DUSK = { skyT: [18,18,34], skyB: [84,116,150], far: [62,48,60], mid: [48,34,42], g1: [70,42,38], g2: [32,22,24], rock: [28,18,18] };
 const C = (key, k, a) => mixc(DAY[key], DUSK[key], k, a);
-
 function sky(k, t) {
   const g = ctx.createLinearGradient(0, 0, 0, 560);
   g.addColorStop(0, C('skyT', k)); g.addColorStop(1, C('skyB', k));
@@ -404,8 +265,6 @@ function ground(cam, k) {
     const wx = i * 90 + rnd(i) * 60, sz = rnd(i + 7) * 11 + 3, y = terrainY(wx) + 14 + rnd(i + 11) * 130;
     ctx.fillStyle = C('rock', k, .9);
     ctx.beginPath(); ctx.ellipse(wx - cam, y, sz * 1.4, sz * .7, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = `rgba(255,220,190,${.18 * (1 - k)})`;
-    ctx.beginPath(); ctx.ellipse(wx - cam - sz * .3, y - sz * .3, sz * .6, sz * .25, 0, 0, 7); ctx.fill();
   }
 }
 function prints(fromX, toX, cam) {
@@ -414,8 +273,15 @@ function prints(fromX, toX, cam) {
     ctx.beginPath(); ctx.ellipse(wx - cam, terrainY(wx) + 4 + (n % 2 ? 3 : -2), 8, 3, 0, 0, 7); ctx.fill();
   }
 }
+function dustField(t, a, n = 90) {
+  for (let i = 0; i < n; i++) {
+    const x = ((rnd(i) * W + t * (60 + rnd(i + 5) * 140)) % (W + 40)) - 20, y = rnd(i + 9) * H;
+    ctx.fillStyle = `rgba(230,170,120,${a * (.25 + rnd(i + 2) * .5)})`;
+    ctx.beginPath(); ctx.arc(x, y + Math.sin(t * 2 + i) * 6, 1 + rnd(i + 4) * 2.5, 0, 7); ctx.fill();
+  }
+}
 
-// ---------- lander ----------
+// ---------- lander, rover and astronaut ----------
 function lander(x, y) {
   ctx.strokeStyle = '#8b8c90'; ctx.lineWidth = 6; ctx.lineCap = 'round';
   for (const s of [-1, 1]) {
@@ -428,15 +294,18 @@ function lander(x, y) {
   ctx.moveTo(x - 60, y - 118); ctx.lineTo(x + 60, y - 118); ctx.lineTo(x + 46, y - 60); ctx.lineTo(x - 46, y - 60); ctx.fill();
   ctx.fillStyle = '#ecebe6'; rr(x - 44, y - 178, 88, 62, 14); ctx.fill();
   ctx.fillStyle = '#2b3a4c'; ctx.beginPath(); ctx.arc(x - 12, y - 150, 12, 0, 7); ctx.fill();
-  ctx.fillStyle = '#c8c7c2'; rr(x + 14, y - 166, 22, 40, 4); ctx.fill();
   ctx.strokeStyle = '#b4451f'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x - 40, y - 122); ctx.lineTo(x + 40, y - 122); ctx.stroke();
-  // ladder
-  ctx.strokeStyle = '#a6a7aa'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(x + 52, y - 118); ctx.lineTo(x + 66, y); ctx.moveTo(x + 64, y - 118); ctx.lineTo(x + 78, y); ctx.stroke();
-  for (let i = 1; i < 6; i++) { const k = i / 6; ctx.beginPath(); ctx.moveTo(x + 52 + 14 * k, y - 118 + 118 * k); ctx.lineTo(x + 64 + 14 * k, y - 118 + 118 * k); ctx.stroke(); }
 }
-
-// ---------- astronaut ----------
+function rover(x, y, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#d9d6cf'; rr(-80, -70, 160, 36, 8); ctx.fill();
+  ctx.fillStyle = '#3d6fa8'; rr(-70, -88, 120, 16, 4); ctx.fill();
+  ctx.strokeStyle = '#8b8c90'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(50, -70); ctx.lineTo(50, -130); ctx.stroke();
+  ctx.fillStyle = '#ecebe6'; rr(36, -146, 30, 20, 4); ctx.fill();
+  ctx.fillStyle = '#2b3a4c'; ctx.beginPath(); ctx.arc(58, -136, 5, 0, 7); ctx.fill();
+  for (const wx of [-62, 0, 62]) { ctx.fillStyle = '#3a3330'; ctx.beginPath(); ctx.arc(wx, -18, 18, 0, 7); ctx.fill(); ctx.fillStyle = '#7d756f'; ctx.beginPath(); ctx.arc(wx, -18, 7, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
 function limb(x, y, a1, a2, len, color, w) {
   const kx = x + Math.sin(a1) * len, ky = y + Math.cos(a1) * len;
   const ex = kx + Math.sin(a2) * len, ey = ky + Math.cos(a2) * len;
@@ -451,28 +320,21 @@ function astronaut(x, y, s, o = {}) {
   const ph = o.walk || 0, amp = o.walk === undefined ? 0 : .55;
   const sw = Math.sin(ph) * amp;
   ctx.save(); ctx.translate(x, y); ctx.scale(s * (o.facing || 1), s);
-  // shadow
   ctx.fillStyle = 'rgba(40,15,5,.3)'; ctx.beginPath(); ctx.ellipse(0, 2, 34, 6, 0, 0, 7); ctx.fill();
   const hipY = -50;
-  // back leg and back arm
   let f = limb(-4, hipY, -sw, -sw + Math.max(0, Math.sin(ph + Math.PI)) * .9 * (amp ? 1 : 0) - .05, 25, '#cfcbc4', 15);
   ctx.fillStyle = '#5b4e48'; rr(f[0] - 9, f[1] - 4, 22, 9, 4); ctx.fill();
   limb(-2, -94, sw * .8, sw * .8 - .7, 22, '#cfcbc4', 12);
-  // backpack
   ctx.fillStyle = '#b9b5ae'; rr(-36, -112, 20, 56, 6); ctx.fill();
   ctx.fillStyle = '#e5733f'; rr(-33, -104, 6, 14, 2); ctx.fill();
-  // body
   ctx.fillStyle = '#f2efe9'; rr(-20, -108, 40, 62, 12); ctx.fill();
   ctx.strokeStyle = 'rgba(40,30,30,.35)'; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = '#3d6fa8'; rr(-6, -94, 18, 12, 2); ctx.fill();
   ctx.fillStyle = '#b4451f'; rr(-6, -78, 18, 4, 2); ctx.fill();
-  // front leg
   f = limb(4, hipY, sw, sw + Math.max(0, Math.sin(ph)) * .9 * (amp ? 1 : 0) - .05, 25, '#f2efe9', 15);
   ctx.fillStyle = '#5b4e48'; rr(f[0] - 9, f[1] - 4, 22, 9, 4); ctx.fill();
-  // front arm (or wave)
   if (o.wave !== undefined) limb(6, -96, Math.PI * .85 + o.wave * .25, Math.PI * .95 + o.wave * .5, 22, '#f2efe9', 12);
   else limb(6, -96, -sw * .8, -sw * .8 - .7, 22, '#f2efe9', 12);
-  // helmet
   ctx.fillStyle = '#f7f5f0'; ctx.beginPath(); ctx.arc(2, -128, 23, 0, 7); ctx.fill();
   ctx.strokeStyle = 'rgba(40,30,30,.35)'; ctx.lineWidth = 2; ctx.stroke();
   const vg = ctx.createLinearGradient(0, -142, 20, -114);
@@ -482,292 +344,453 @@ function astronaut(x, y, s, o = {}) {
   ctx.restore();
 }
 
-// ---------- real HiRISE image of Mount Sharp's boxwork area (NASA/JPL/UArizona via Mars Trek) ----------
-// 3×2 tiles at zoom 15 around 4.80°S 137.39°E. Trek allows CORS, so the canvas stays recordable.
+// ---------- visor HUD (helmet display) ----------
+function visor(cx, cy, R, k, t) {
+  ctx.save();
+  ctx.globalAlpha = k;
+  const g = ctx.createRadialGradient(cx, cy, R * .2, cx, cy, R);
+  g.addColorStop(0, 'rgba(255,154,98,.10)'); g.addColorStop(1, 'rgba(255,154,98,.02)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,154,98,.85)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2 * easeOut(k)); ctx.stroke();
+  ctx.setLineDash([10, 14]); ctx.lineDashOffset = -t * 40; ctx.strokeStyle = 'rgba(108,194,143,.7)';
+  ctx.beginPath(); ctx.arc(cx, cy, R * .78, 0, 7); ctx.stroke();
+  ctx.setLineDash([3, 9]); ctx.lineDashOffset = t * 30; ctx.strokeStyle = 'rgba(255,209,102,.6)';
+  ctx.beginPath(); ctx.arc(cx, cy, R * .58, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+  const a = t * 1.6;
+  ctx.strokeStyle = 'rgba(255,154,98,.9)'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(cx, cy, R * .9, a, a + .6); ctx.stroke();
+  ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.35)';
+  ctx.beginPath(); ctx.moveTo(cx - R * .3, cy); ctx.lineTo(cx + R * .3, cy); ctx.moveTo(cx, cy - R * .3); ctx.lineTo(cx, cy + R * .3); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- real HiRISE image of the Jezero delta (NASA/JPL/UArizona via Mars Trek) ----------
+// 3×2 tiles at zoom 15 around 18.46°N 77.40°E. Trek allows CORS, so the canvas stays recordable.
 let mapImg = null;
 (function loadMap() {
-  const base = 'https://trek.nasa.gov/tiles/Mars/EQ/curiosity_hirise_mosaic/1.0.0/default/default028mm/15';
+  const base = 'https://trek.nasa.gov/tiles/Mars/EQ/JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first_dd/1.0.0/default/default028mm/15';
   const c = document.createElement('canvas'); c.width = 768; c.height = 512;
   const g = c.getContext('2d'); let ok = 0;
   for (let j = 0; j < 2; j++) for (let i = 0; i < 3; i++) {
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => { g.drawImage(img, i * 256, j * 256); if (++ok === 6) mapImg = c; };
-    img.src = `${base}/${17257 + j}/${57778 + i}.png`;
+    img.src = `${base}/${13023 + j}/${46857 + i}.png`;
   }
 })();
 
-// ---------- scenes ----------
-// 0:00 – Slogan and team
-function sTeam(lt, t) {
-  ctx.fillStyle = '#05040a'; ctx.fillRect(0, 0, W, H);
-  stars(t, 1);
-  planet(1080, 360, lerp(190, 215, easeOut(lt / 2)), lt);
-  const shade = ctx.createLinearGradient(0, 0, 980, 0);
-  shade.addColorStop(0, 'rgba(5,4,10,.9)'); shade.addColorStop(.75, 'rgba(5,4,10,.5)'); shade.addColorStop(1, 'rgba(5,4,10,0)');
-  ctx.fillStyle = shade; ctx.fillRect(0, 0, W, H);
-  ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 12;
-  // slogan
-  ctx.globalAlpha = fadeIn(lt, 0, .3);
-  const qEnd = wrap(SLOGAN.question, 70, 110, 820, 44, '#fff', 1.18, 800);
-  ctx.globalAlpha = fadeIn(lt, .35, .3);
-  text(SLOGAN.answer, 72, qEnd + 22, 28, '#ff9a62', { weight: 700 });
-  ctx.globalAlpha = fadeIn(lt, .6, .3);
-  text(SLOGAN.tagline, 72, qEnd + 64, 24, '#ffd166', { weight: 600 });
-  // team
-  ctx.globalAlpha = fadeIn(lt, .85, .3);
-  const ty = qEnd + 130;
-  ctx.fillStyle = 'rgba(255,154,98,.6)'; ctx.fillRect(72, ty - 34, 120, 3);
-  text(`TEAM ${TEAM.name}`, 72, ty, 30, '#fff', { weight: 800 });
-  text(`${TEAM.place} · NASA Space Apps Challenge`, 72, ty + 32, 18, '#e8d6cc', { weight: 400 });
-  TEAM.members.forEach((m, i) => {
-    ctx.globalAlpha = fadeIn(lt, 1 + i * .12, .25);
-    const col = i % 3, row = Math.floor(i / 3);
-    text('●', 72 + col * 270, ty + 82 + row * 36, 14, '#ff9a62', { weight: 700 });
-    text(m, 94 + col * 270, ty + 82 + row * 36, 22, '#fff', { weight: 600 });
-  });
-  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
-  hotspot(860, ty - 10, 'team', 'Who we are', t);
-}
-
-// 0:02 – The challenge
-function sChallenge(lt, t) {
-  sky(0, t); hills(0, 0); ground(0, 0);
-  lander(980, terrainY(980));
-  const x = lerp(860, 760, ease(lt / 3));
-  prints(780, 860, 0);
-  astronaut(x, terrainY(x) - Math.abs(Math.sin(x / 20)) * 6, 1.1, { walk: x / 20, facing: -1 });
-  ctx.globalAlpha = fadeIn(lt, 0);
-  ctx.fillStyle = 'rgba(18,13,11,.86)'; rr(50, 50, 600, 330, 12); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,154,98,.7)'; ctx.lineWidth = 1.5; rr(50, 50, 600, 330, 12); ctx.stroke();
-  text('NASA SPACE APPS CHALLENGE', 78, 92, 15, '#ffb48a', { weight: 700 });
-  let y = wrap('Build a map an astronaut can use while exploring the surface of Mars, using NASA data.', 78, 140, 545, 28, '#fff', 1.25, 600);
-  ctx.globalAlpha = fadeIn(lt, .9);
-  text('WHAT INSPIRED US', 78, y + 22, 15, '#ffb48a', { weight: 700 });
-  wrap('In 2025 Curiosity studied boxwork ridges on Mount Sharp. We asked: could a crew walk there safely?', 78, y + 56, 545, 20, '#e8d6cc', 1.35);
+// ================= scenes =================
+// 0:00 – Hook: one wrong turn (team on screen)
+function sHook(lt, t) {
+  const danger = fadeIn(lt, 1.3, .25);
+  sky(.15, t); hills(0, .15); ground(0, .15);
+  // crevasse ahead of the astronaut
+  const cg = ctx.createLinearGradient(0, 560, 0, H);
+  cg.addColorStop(0, '#2a0f08'); cg.addColorStop(1, '#070302');
+  ctx.fillStyle = cg; ctx.beginPath();
+  ctx.moveTo(800, terrainY(800)); ctx.lineTo(1030, terrainY(1030)); ctx.lineTo(980, H); ctx.lineTo(860, H); ctx.closePath(); ctx.fill();
+  if (danger > 0) {
+    ctx.strokeStyle = `rgba(255,93,93,${danger})`; ctx.lineWidth = 4; ctx.setLineDash([12, 8]);
+    ctx.beginPath(); ctx.moveTo(800, terrainY(800)); ctx.lineTo(1030, terrainY(1030)); ctx.stroke(); ctx.setLineDash([]);
+    text('⚠', 915, 545, 48, `rgba(255,93,93,${danger})`, { align: 'center', weight: 800 });
+  }
+  const x = lerp(560, 760, ease(lt / 1.4));
+  prints(600, x - 20, 0);
+  astronaut(x, terrainY(x) - (lt < 1.4 ? Math.abs(Math.sin(x / 20)) * 6 : 0), 1.15, lt < 1.4 ? { walk: x / 20 } : {});
+  // red alert vignette
+  if (danger > 0) {
+    const v = ctx.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .85);
+    v.addColorStop(0, 'rgba(255,0,0,0)'); v.addColorStop(1, `rgba(200,20,20,${.45 * danger * (.7 + .3 * Math.sin(t * 12))})`);
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  }
+  ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 14;
+  ctx.globalAlpha = fadeIn(lt, 0, .25); text('ON MARS,', 64, 112, 34, '#ffb48a', { weight: 800 });
+  ctx.globalAlpha = fadeIn(lt, .3, .25); text('ONE WRONG TURN', 60, 196, 74, '#fff', { weight: 900 });
+  ctx.globalAlpha = fadeIn(lt, .8, .25); text('CAN COST A LIFE.', 60, 280, 74, '#ff5d5d', { weight: 900 });
+  ctx.shadowBlur = 0;
+  // team badge
+  ctx.globalAlpha = fadeIn(lt, .2, .4);
+  ctx.fillStyle = 'rgba(12,9,8,.82)'; rr(60, 330, 560, 104, 10); ctx.fill();
+  text(`TEAM ${TEAM.name} · ${TEAM.place}`, 80, 364, 19, '#ff9a62', { weight: 800 });
+  wrap(TEAM.members.join(' · '), 80, 394, 520, 16, '#f1e6e0', 1.35, 500);
   ctx.globalAlpha = 1;
-  hotspot(612, 92, 'challenge', 'The challenge', t);
+  hotspot(600, 340, 'team', '', t);
+  if (danger > .5) hotspot(915, 600, 'wrongturn', '', t);
 }
 
-// 0:05 – Name your solution
-function sSolution(lt, t) {
-  ctx.fillStyle = '#120c0a'; ctx.fillRect(0, 0, W, H);
-  stars(t, .35);
-  planet(1180, 120, 160, lt);
-  ctx.globalAlpha = fadeIn(lt, 0, .5);
-  const s = 1 + .1 * (1 - easeOut(lt / .6));
-  ctx.save(); ctx.translate(70, 170); ctx.scale(s, s);
-  text('ATHENEA', 0, 0, 120, '#ff9a62', { weight: 800 });
+// 0:03 – The question
+function sQuestion(lt, t) {
+  ctx.fillStyle = '#07050a'; ctx.fillRect(0, 0, W, H);
+  stars(t, .7);
+  visor(930, 340, 240, fadeIn(lt, 0, 1.2), t);
+  // HUD readouts booting inside the visor
+  ['SCANNING TERRAIN…', 'PRESSURE · TEMPERATURE', 'ROUTE OPTIONS'].forEach((s, i) => {
+    ctx.globalAlpha = fadeIn(lt, .6 + i * .5, .3) * (.6 + .4 * Math.sin(t * 6 + i));
+    text(s, 930, 300 + i * 36, 18, '#6cc28f', { align: 'center', weight: 700 });
+  });
+  ctx.globalAlpha = 1;
+  const q = 'What if something could make the call for you,';
+  const n = Math.floor(clamp(lt / 2) * q.length);
+  ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 10;
+  const yEnd = wrap(q.slice(0, n) + (lt < 2 && Math.sin(t * 10) > 0 ? '▌' : ''), 64, 230, 560, 50, '#fff', 1.18, 800);
+  if (lt > 2.1) glowText('in real time?', 64, Math.max(yEnd, 340) + 20, 62, '#ff9a62', 'rgba(255,154,98,.8)', fadeIn(lt, 2.1, .4));
+  ctx.shadowBlur = 0;
+}
+
+// 0:06 – The problem: four hazards slam in, then the high-stakes line
+const HAZARDS = [
+  ['THIN AIR', '< 1%', "of Earth's air pressure", 'pressure', '#7fb3ff'],
+  ['BRUTAL COLD', '−80 °C', 'nights in Jezero', 'cold', '#9ad1ff'],
+  ['DUST EVERYWHERE', 'Storms', 'cut light and power', 'dust', '#ffd166'],
+  ['TERRAIN', 'Unfair', 'slopes, sand, boulders', 'terrain', '#ff8c69'],
+];
+function hazardIcon(id, x, y, lt, t) {
+  ctx.save(); ctx.translate(x, y); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';
+  if (id === 'pressure') {
+    ctx.beginPath(); ctx.arc(0, 10, 34, Math.PI, 0); ctx.stroke();
+    const a = Math.PI + lerp(.8, .08, easeOut(lt)) * Math.PI;
+    ctx.strokeStyle = '#ff5d5d'; ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(Math.cos(a) * 28, 10 + Math.sin(a) * 28); ctx.stroke();
+  } else if (id === 'cold') {
+    rr(-8, -34, 16, 52, 8); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 26, 13, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#9ad1ff'; ctx.beginPath(); ctx.arc(0, 26, 8, 0, 7); ctx.fill();
+    const h = lerp(40, 8, easeOut(lt)); ctx.fillRect(-3, 22 - h, 6, h);
+  } else if (id === 'dust') {
+    for (let i = 0; i < 18; i++) { const a = t * 2 + i, r = 6 + (i % 6) * 6; ctx.fillStyle = `rgba(255,209,102,${.4 + (i % 3) * .2})`; ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r * .6, 3, 0, 7); ctx.fill(); }
+  } else {
+    ctx.beginPath(); ctx.moveTo(-38, 30); ctx.lineTo(10, -30); ctx.lineTo(40, 30); ctx.closePath(); ctx.stroke();
+    ctx.strokeStyle = '#ff5d5d'; ctx.beginPath(); ctx.moveTo(4, -18); ctx.lineTo(-6, 0); ctx.lineTo(6, 10); ctx.lineTo(-2, 28); ctx.stroke();
+  }
   ctx.restore();
-  ctx.globalAlpha = fadeIn(lt, .5);
-  text(SLOGAN.answer, 74, 222, 30, '#fff', { weight: 600 });
-  text(SLOGAN.tagline, 74, 262, 22, '#ffd166', { weight: 600 });
-  const cards = [
-    ['PROBLEM', 'On foot, in a suit, far from base: where is it safe to walk, and when must you turn back?', 'problem'],
-    ['WHO GAINS', 'Astronauts on the EVA, mission planners and the science team choosing the stops.', 'users'],
-    ['OPPORTUNITY', 'Crewed missions to Mars are coming, and Artemis returns people to the Moon first.', 'opportunity'],
-  ];
-  cards.forEach(([title, body, id], i) => {
-    const a = fadeIn(lt, 1.2 + i * .9, .5), x = 70 + i * 390, y = 300 + (1 - easeOut(a)) * 30;
-    if (a <= 0) return;
-    ctx.globalAlpha = a;
-    ctx.fillStyle = 'rgba(34,26,23,.95)'; rr(x, y, 360, 260, 12); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,154,98,.55)'; ctx.lineWidth = 1.5; rr(x, y, 360, 260, 12); ctx.stroke();
-    text(title, x + 24, y + 44, 16, '#ffb48a', { weight: 700 });
-    wrap(body, x + 24, y + 86, 312, 23, '#fff', 1.35, 500);
-    ctx.globalAlpha = 1;
-    if (a > .6) hotspot(x + 320, y + 36, id, '', t);
+}
+function sProblem(lt, t) {
+  sky(.3, t); hills(lt * 30, .3); ground(lt * 30, .3);
+  ctx.fillStyle = `rgba(200,120,70,${.25 + .1 * Math.sin(t)})`; ctx.fillRect(0, 0, W, H);
+  dustField(t, .9);
+  HAZARDS.forEach(([title, big, small, id, col], i) => {
+    const at = i * 1.1, a = fadeIn(lt, at, .3); if (a <= 0) return;
+    const x = 52 + i * 300, y = 90 + (1 - easeOut(a)) * 60, s = 1 + .15 * (1 - easeOut(clamp((lt - at) / .35)));
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(x + 135, y + 160); ctx.scale(s, s); ctx.translate(-x - 135, -y - 160);
+    ctx.fillStyle = 'rgba(12,9,8,.86)'; rr(x, y, 270, 320, 14); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 3; rr(x, y, 270, 320, 14); ctx.stroke();
+    hazardIcon(id, x + 135, y + 90, clamp((lt - at) / 1), t);
+    text(title, x + 135, y + 175, 20, col, { align: 'center', weight: 800 });
+    text(big, x + 135, y + 235, 46, '#fff', { align: 'center', weight: 900 });
+    text(small, x + 135, y + 275, 17, '#e8d6cc', { align: 'center', weight: 500 });
+    ctx.restore();
+    if (a > .8) hotspot(x + 246, y + 22, id, '', t);
   });
-  ctx.globalAlpha = 1;
+  const k = fadeIn(lt, 4.6, .5);
+  if (k > 0) {
+    ctx.globalAlpha = k;
+    ctx.fillStyle = 'rgba(12,9,8,.88)'; rr(52, 452, 1170, 120, 14); ctx.fill();
+    text('On the Red Planet,', 640, 500, 28, '#ffb48a', { align: 'center', weight: 700 });
+    glowText('every step is a high-stakes decision.', 640 - 330, 552, 42, '#fff', 'rgba(255,93,93,.7)', k);
+    ctx.globalAlpha = 1;
+  }
 }
 
-// 0:10 – Describe your idea: the prototype at work
-const MAP = { x: 50, y: 110, w: 700, h: 520 };
-const STOPS = [[150, 450], [270, 360], [430, 300], [570, 200], [640, 330]]; // base + S1..S4, map-relative
-const ROUTE = [[150, 450], [200, 410], [270, 360], [340, 345], [430, 300], [500, 250], [570, 200], [620, 260], [640, 330], [520, 400], [380, 440], [250, 470], [150, 450]];
-const RCUM = ROUTE.reduce((a, p, i) => (a.push(i ? a[i - 1] + Math.hypot(p[0] - ROUTE[i - 1][0], p[1] - ROUTE[i - 1][1]) : 0), a), []);
-const DATA = [
-  ['#7fb3ff', 'Optical', 'HiRISE · CTX'],
-  ['#ffd166', 'Topographic', 'HiRISE terrain model'],
-  ['#ff8c69', 'Thermal', 'THEMIS night infrared'],
-  ['#6cc28f', 'In situ', 'Curiosity · Perseverance'],
-  ['#c77dff', 'Radiation', 'RAD (Curiosity)'],
-  ['#ff5d5d', 'Space weather', 'DONKI, live'],
-  ['#9ad1ff', 'Weather', 'REMS · MEDA'],
+// 0:14 – Meet ATHENEA
+function sMeet(lt, t) {
+  ctx.fillStyle = '#0c0807'; ctx.fillRect(0, 0, W, H);
+  stars(t, .5);
+  visor(640, 330, 300, 1, t);
+  const s = 1 + .4 * (1 - easeOut(clamp((lt - .1) / .5)));
+  ctx.save(); ctx.globalAlpha = fadeIn(lt, .1, .3); ctx.translate(640, 330); ctx.scale(s, s);
+  text('MEET', 0, -70, 30, '#ffb48a', { align: 'center', weight: 800 });
+  ctx.shadowColor = 'rgba(255,154,98,.9)'; ctx.shadowBlur = 40;
+  text('ATHENEA', 0, 40, 130, '#ff9a62', { align: 'center', weight: 900 });
+  ctx.restore();
+  ctx.globalAlpha = fadeIn(lt, 1.2, .4);
+  text("a platform that fits an astronaut's suit or a rover", 640, 470, 30, '#fff', { align: 'center', weight: 600 });
+  ctx.globalAlpha = fadeIn(lt, 1.6, .5);
+  astronaut(190, 640, .95, { wave: Math.sin(t * 6) });
+  rover(1080, 650, .95);
+  text('SUIT', 190, 676, 16, '#6cc28f', { align: 'center', weight: 800 });
+  text('ROVER', 1080, 676, 16, '#6cc28f', { align: 'center', weight: 800 });
+  ctx.globalAlpha = 1;
+  if (lt > 1) hotspot(890, 130, 'copilot', '', t);
+}
+
+// 0:18 – How it works: map + live readings, synced with the narration
+const MAP = { x: 40, y: 96, w: 720, h: 500 };
+const BASE = [110, 430], SITE = [610, 140];
+const SHORTCUT = [BASE, SITE];
+const SAFE = [BASE, [210, 470], [360, 480], [500, 420], [590, 330], [640, 230], SITE];
+const SCUM = SAFE.reduce((a, p, i) => (a.push(i ? a[i - 1] + Math.hypot(p[0] - SAFE[i - 1][0], p[1] - SAFE[i - 1][1]) : 0), a), []);
+const READINGS = [ // [appear (s), label, value, bar 0..1, color, note]
+  [.3,  'Terrain slope',  '9°',          .35, '#6cc28f', 'topography'],
+  [1.0, 'Pressure',       '730 Pa',      .2,  '#7fb3ff', ''],
+  [1.7, 'Temperature',    '−42 °C',      .3,  '#9ad1ff', ''],
+  [5.4, 'Oxygen',         '82 %',        .82, '#6cc28f', ''],
+  [5.9, 'Food & water',   '3,035 kcal · 240 ml/hs EVA', .6, '#ffd166', ''],
+  [6.4, 'Heart rate',     '92 bpm',      .5,  '#c77dff', 'next phase'],
+  [7.4, 'Time to return', '0 h 20 + 0 h 30 reserve', .7, '#6cc28f', ''],
 ];
 function sHow(lt, t) {
   ctx.fillStyle = '#0f0d0c'; ctx.fillRect(0, 0, W, H);
-  // app header
-  ctx.fillStyle = '#181412'; ctx.fillRect(0, 0, W, 90);
-  text('ATHENEA · Mount Sharp EVA', 50, 40, 22, '#f3ebe6', { weight: 700 });
-  text('Gale crater · boxwork region · 4.80°S 137.39°E', 50, 66, 15, '#a8968c', { weight: 400 });
-  const chips = [['EVA', '4 h 07'], ['RESERVE', '2 h 53'], ['DOSE', '0.110 mSv']];
-  ctx.globalAlpha = fadeIn(lt, 4.5);
-  chips.forEach(([k, v], i) => {
-    const x = 560 + i * 150;
-    ctx.fillStyle = '#221c19'; rr(x, 18, 136, 54, 8); ctx.fill();
-    text(k, x + 12, 38, 11, '#a8968c', { weight: 600 }); text(v, x + 12, 62, 19, '#f3ebe6', { weight: 600 });
-  });
-  ctx.fillStyle = '#ffd166'; rr(1020, 22, 220, 46, 8); ctx.fill();
-  text('EVA WITH CAUTION', 1130, 52, 17, '#2b2206', { align: 'center', weight: 800 });
-  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#181412'; ctx.fillRect(0, 0, W, 80);
+  text('ATHENEA · Jezero Delta EVA', 40, 36, 22, '#f3ebe6', { weight: 800 });
+  text('Powered by NASA data · 18.46°N 77.40°E', 40, 62, 15, '#a8968c', { weight: 400 });
   // map with real HiRISE imagery
   ctx.save(); rr(MAP.x, MAP.y, MAP.w, MAP.h, 10); ctx.clip();
-  if (mapImg) { ctx.filter = 'sepia(.55) saturate(1.4) brightness(.95)'; ctx.drawImage(mapImg, 40, 0, 689, 512, MAP.x, MAP.y, MAP.w, MAP.h); ctx.filter = 'none'; }
-  else { ctx.fillStyle = '#8a5a3c'; ctx.fillRect(MAP.x, MAP.y, MAP.w, MAP.h); for (let i = 0; i < 60; i++) { ctx.fillStyle = 'rgba(60,25,10,.25)'; ctx.beginPath(); ctx.arc(MAP.x + rnd(i) * MAP.w, MAP.y + rnd(i + 7) * MAP.h, 6 + rnd(i + 3) * 30, 0, 7); ctx.fill(); } }
-  // slope overlay
-  const sA = fadeIn(lt, .4, .6);
-  [[360, 470, 70, '#ff9b42'], [470, 400, 55, '#ff5d5d'], [600, 430, 60, '#ff9b42'], [330, 230, 50, '#ffd166']].forEach(([x, y, r, c]) => {
-    ctx.globalAlpha = sA * .45; ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(MAP.x + x, MAP.y + y - 60, r, r * .7, 0, 0, 7); ctx.fill();
-  });
+  if (mapImg) { ctx.filter = 'sepia(.6) saturate(1.5) brightness(.9)'; ctx.drawImage(mapImg, 20, 0, 735, 512, MAP.x, MAP.y, MAP.w, MAP.h); ctx.filter = 'none'; }
+  else { ctx.fillStyle = '#8a5a3c'; ctx.fillRect(MAP.x, MAP.y, MAP.w, MAP.h); }
+  // hazard zones
+  const hz = fadeIn(lt, .3, .6);
+  ctx.globalAlpha = hz * .5;
+  ctx.fillStyle = '#ff5d5d'; ctx.beginPath(); ctx.ellipse(MAP.x + 380, MAP.y + 290, 95, 70, -.4, 0, 7); ctx.fill();
+  ctx.fillStyle = '#3a2418'; ctx.beginPath(); ctx.ellipse(MAP.x + 250, MAP.y + 330, 70, 45, .3, 0, 7); ctx.fill();
+  ctx.globalAlpha = hz;
+  text('22° slope', MAP.x + 380, MAP.y + 296, 18, '#fff', { align: 'center', weight: 800 });
+  text('loose sand', MAP.x + 250, MAP.y + 336, 15, '#ffd166', { align: 'center', weight: 700 });
   ctx.globalAlpha = 1;
-  // route (drawn progressively)
-  const p = ease((lt - 1.4) / 3.4) * RCUM[RCUM.length - 1];
-  const path = () => {
-    ctx.beginPath(); ctx.moveTo(MAP.x + ROUTE[0][0], MAP.y + ROUTE[0][1]);
-    for (let i = 1; i < ROUTE.length; i++) {
-      if (RCUM[i] <= p) ctx.lineTo(MAP.x + ROUTE[i][0], MAP.y + ROUTE[i][1]);
-      else { const k = (p - RCUM[i - 1]) / (RCUM[i] - RCUM[i - 1]); if (k > 0) ctx.lineTo(MAP.x + lerp(ROUTE[i - 1][0], ROUTE[i][0], k), MAP.y + lerp(ROUTE[i - 1][1], ROUTE[i][1], k)); break; }
-    }
-  };
+  const P = ([x, y]) => [MAP.x + x, MAP.y + y];
+  // shortcut (rejected)
+  const sc = clamp((lt - 2) / .8);
+  if (sc > 0) {
+    const [ax, ay] = P(BASE), [bx, by] = P(SITE);
+    ctx.strokeStyle = 'rgba(255,93,93,.95)'; ctx.lineWidth = 5; ctx.setLineDash([12, 10]);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(lerp(ax, bx, sc), lerp(ay, by, sc)); ctx.stroke(); ctx.setLineDash([]);
+    if (lt > 2.9) { const mx = (ax + bx) / 2, my = (ay + by) / 2; text('✕', mx, my + 14, 56, '#ff5d5d', { align: 'center', weight: 900 });
+      ctx.fillStyle = 'rgba(18,13,11,.88)'; rr(mx + 24, my - 26, 190, 36, 8); ctx.fill(); text('Shortcut: too steep', mx + 36, my - 1, 17, '#ff8c8c', { weight: 700 }); }
+  }
+  // safe route
+  const p = ease((lt - 3.2) / 2.2) * SCUM[SCUM.length - 1];
   if (p > 0) {
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 10; path(); ctx.stroke();
-    ctx.strokeStyle = '#3ddc97'; ctx.lineWidth = 5; path(); ctx.stroke();
+    const path = () => { ctx.beginPath(); ctx.moveTo(...P(SAFE[0])); for (let i = 1; i < SAFE.length; i++) { if (SCUM[i] <= p) ctx.lineTo(...P(SAFE[i])); else { const k = (p - SCUM[i - 1]) / (SCUM[i] - SCUM[i - 1]); if (k > 0) ctx.lineTo(MAP.x + lerp(SAFE[i - 1][0], SAFE[i][0], k), MAP.y + lerp(SAFE[i - 1][1], SAFE[i][1], k)); break; } } };
+    ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 11; path(); ctx.stroke();
+    ctx.save(); ctx.shadowColor = 'rgba(61,220,151,.9)'; ctx.shadowBlur = 16; ctx.strokeStyle = '#3ddc97'; ctx.lineWidth = 6; path(); ctx.stroke(); ctx.restore();
+    if (lt > 5.4) { ctx.fillStyle = 'rgba(18,13,11,.9)'; rr(MAP.x + 380, MAP.y + 470 - 60, 250, 40, 8); ctx.fill(); text('Safest route · max 9°', MAP.x + 394, MAP.y + 470 - 33, 18, '#3ddc97', { weight: 800 }); }
   }
-  // base and stops
-  const [bx, by] = STOPS[0];
-  ctx.fillStyle = '#3ddc97'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; rr(MAP.x + bx - 12, MAP.y + by - 12, 24, 24, 5); ctx.fill(); ctx.stroke();
-  text('Base', MAP.x + bx, MAP.y + by + 32, 15, '#fff', { align: 'center', weight: 700 });
-  STOPS.slice(1).forEach(([x, y], i) => {
-    const a = fadeIn(lt, .2 + i * .25, .3); if (a <= 0) return;
-    ctx.globalAlpha = a;
-    ctx.fillStyle = '#f08a4b'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(MAP.x + x, MAP.y + y, 15, 0, 7); ctx.fill(); ctx.stroke();
-    text('S' + (i + 1), MAP.x + x, MAP.y + y + 1, 13, '#1d0e05', { align: 'center', base: 'middle', weight: 800 });
-    ctx.globalAlpha = 1;
-  });
+  // base and site
+  const [bx0, by0] = P(BASE), [sx0, sy0] = P(SITE);
+  ctx.fillStyle = '#3ddc97'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; rr(bx0 - 12, by0 - 12, 24, 24, 5); ctx.fill(); ctx.stroke();
+  text('Base', bx0, by0 + 32, 15, '#fff', { align: 'center', weight: 800 });
+  text('★', sx0, sy0 + 10, 34, '#ffd166', { align: 'center', weight: 900 });
+  text('Sample site', sx0, sy0 - 22, 15, '#fff', { align: 'center', weight: 800 });
   ctx.restore();
   ctx.strokeStyle = '#3a2f2a'; ctx.lineWidth = 2; rr(MAP.x, MAP.y, MAP.w, MAP.h, 10); ctx.stroke();
-  text('Real HiRISE image · Mount Sharp boxwork · NASA/JPL/UArizona', MAP.x + 12, MAP.y + MAP.h - 12, 12, 'rgba(255,255,255,.75)', { weight: 400 });
-  // "why head back" card near S3
-  const cA = fadeIn(lt, 5.8, .5);
-  if (cA > 0) {
-    ctx.globalAlpha = cA;
-    const cx = MAP.x + 360, cy = MAP.y + 20;
-    ctx.fillStyle = 'rgba(28,23,20,.95)'; rr(cx, cy, 300, 120, 10); ctx.fill();
-    ctx.strokeStyle = '#3ddc97'; ctx.lineWidth = 2; rr(cx, cy, 300, 120, 10); ctx.stroke();
-    text('S3 · WHY HEAD BACK', cx + 16, cy + 28, 14, '#3ddc97', { weight: 700 });
-    text('Return along route   0 h 20', cx + 16, cy + 56, 16, '#fff', { weight: 400 });
-    text('Reserve                    0 h 30', cx + 16, cy + 80, 16, '#fff', { weight: 400 });
-    text('Example values for the demo', cx + 16, cy + 105, 12, '#a8968c', { weight: 400 });
-    ctx.globalAlpha = 1;
-  }
-  // NASA data panel
-  ctx.fillStyle = '#181412'; rr(790, 110, 440, 520, 10); ctx.fill();
-  text('NASA DATA IN ONE MAP', 812, 145, 15, '#ffb48a', { weight: 700 });
-  DATA.forEach(([col, kind, src], i) => {
-    const a = fadeIn(lt, .6 + i * .45, .35); if (a <= 0) return;
+  text('Real HiRISE image · Jezero delta · NASA/JPL/UArizona', MAP.x + 12, MAP.y + MAP.h - 10, 12, 'rgba(255,255,255,.75)', { weight: 400 });
+  // step label synced with the voice
+  const step = lt < 3 ? 'Reads terrain · pressure · temperature' : lt < 5.4 ? 'Plans the safest route' : lt < 7.4 ? 'Tracks vitals and food reserves' : 'Every decision built on the environment';
+  ctx.fillStyle = 'rgba(18,13,11,.9)'; rr(MAP.x + 12, MAP.y + 12, 430, 42, 8); ctx.fill();
+  text(step, MAP.x + 26, MAP.y + 40, 20, '#fff', { weight: 700 });
+  // live readings
+  ctx.fillStyle = '#181412'; rr(780, 96, 460, 500, 10); ctx.fill();
+  text('LIVE READINGS', 800, 128, 15, '#ffb48a', { weight: 800 });
+  text('example values', 1220, 128, 12, '#a8968c', { align: 'right', weight: 400 });
+  READINGS.forEach(([at, label, value, bar, col, note], i) => {
+    const a = fadeIn(lt, at, .35); if (a <= 0) return;
     ctx.globalAlpha = a;
-    const y = 172 + i * 56;
-    ctx.fillStyle = '#221c19'; rr(810, y, 400, 46, 8); ctx.fill();
-    ctx.fillStyle = col; rr(810, y, 6, 46, 3); ctx.fill();
-    text(kind, 830, y + 20, 16, '#f3ebe6', { weight: 700 });
-    text(src, 830, y + 39, 14, '#a8968c', { weight: 400 });
+    const y = 146 + i * 62;
+    ctx.fillStyle = '#221c19'; rr(798, y, 424, 54, 8); ctx.fill();
+    ctx.fillStyle = col; rr(798, y, 6, 54, 3); ctx.fill();
+    text(label, 818, y + 22, 15, '#a8968c', { weight: 600 });
+    text(value, 818, y + 45, 19, '#f3ebe6', { weight: 800 });
+    if (note) text(note, 1210, y + 22, 12, col, { align: 'right', weight: 700 });
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; rr(1060, y + 34, 150, 8, 4); ctx.fill();
+    const live = label === 'Oxygen' ? bar - .04 * clamp((lt - at) / 4) : bar;
+    ctx.fillStyle = col; rr(1060, y + 34, 150 * live * easeOut(a), 8, 4); ctx.fill();
     ctx.globalAlpha = 1;
   });
-  // user experience steps
-  const steps = ['1 · Choose science stops', '2 · Route avoids slopes over 15°', '3 · Check time, O₂, dose, return'];
-  const si = clamp(Math.floor((lt - 1) / 2.6), 0, 2);
-  ctx.fillStyle = 'rgba(18,13,11,.88)'; rr(MAP.x + 14, MAP.y + 14, 330, 40, 8); ctx.fill();
-  text(steps[si], MAP.x + 28, MAP.y + 41, 18, '#fff', { weight: 600 });
-  // interactive points
-  if (lt > 3.6) hotspot(1180, 140, 'data', '', t);
-  if (lt > 2.5) hotspot(MAP.x + 430, MAP.y + 300, 'route', 'Route', t);
-  if (lt > 6.2) hotspot(MAP.x + 635, MAP.y + 40, 'return', 'Why head back', t);
+  if (lt > 1) hotspot(1010, 122, 'data', '', t);
+  if (lt > 5) hotspot(MAP.x + 530, MAP.y + 420, 'route', '', t);
+  if (lt > 6.6) hotspot(1180, 146 + 5 * 62 + 27, 'vitals', '', t);
+  if (lt > 7.6) hotspot(1180, 146 + 6 * 62 + 27, 'return', '', t);
 }
 
-// 0:20 – Look to the future
-function sFuture(lt, t) {
-  const k = clamp(lt / 6);
-  sky(k, t);
-  const sx = 1060, sy = 300;
-  const halo = ctx.createRadialGradient(sx, sy, 4, sx, sy, 180);
-  halo.addColorStop(0, `rgba(170,205,240,${.75 * k})`); halo.addColorStop(1, 'rgba(120,170,230,0)');
-  ctx.fillStyle = halo; ctx.fillRect(sx - 180, sy - 180, 360, 360);
-  ctx.fillStyle = '#f4f1e8'; ctx.beginPath(); ctx.arc(sx, sy, 9, 0, 7); ctx.fill();
-  hills(0, k); ground(0, k);
-  lander(1060, terrainY(1060));
-  const mv = clamp(lt / 6), x = lerp(700, 960, ease(mv));
-  ctx.save();
-  ctx.strokeStyle = 'rgba(108,194,143,.9)'; ctx.lineWidth = 5; ctx.setLineDash([14, 12]); ctx.lineDashOffset = -t * 28;
-  ctx.shadowColor = 'rgba(108,194,143,.75)'; ctx.shadowBlur = 14;
-  ctx.beginPath(); ctx.moveTo(x + 34, terrainY(x) - 34); ctx.quadraticCurveTo(1000, 520, 1060, terrainY(1060) - 55); ctx.stroke();
-  ctx.restore();
-  prints(640, x - 20, 0);
-  astronaut(x, terrainY(x) - (mv < 1 ? Math.abs(Math.sin(x / 22)) * 8 : 0), 1.05, mv < 1 ? { walk: x / 22 } : { wave: Math.sin(lt * 7) });
-  ctx.globalAlpha = fadeIn(lt, .2);
-  ctx.fillStyle = 'rgba(18,13,11,.86)'; rr(50, 50, 600, 400, 12); ctx.fill();
-  ctx.strokeStyle = 'rgba(108,194,143,.8)'; ctx.lineWidth = 2; rr(50, 50, 600, 400, 12); ctx.stroke();
-  text('LOOK TO THE FUTURE', 78, 92, 16, '#ffb48a', { weight: 700 });
-  text('What could Athenea change?', 78, 136, 30, '#fff', { weight: 700 });
-  const lines = [
-    ['Safer EVAs', 'Every walk planned with a return margin.', null],
-    ['Any landing site', 'A new site is one new mission profile.', 'scale'],
-    ['Beyond Mars', 'Artemis moonwalks and field work on Earth.', 'beyond'],
-  ];
-  lines.forEach(([title, body, id], i) => {
-    const a = fadeIn(lt, 1 + i * 1.3, .5); if (a <= 0) return;
-    ctx.globalAlpha = a;
-    const y = 200 + i * 80;
-    text('✓', 80, y + 6, 26, '#6cc28f', { weight: 700 });
-    text(title, 118, y, 22, '#fff', { weight: 700 });
-    text(body, 118, y + 30, 18, '#e8d6cc', { weight: 400 });
-    ctx.globalAlpha = 1;
-    if (id && a > .6) hotspot(612, y + 4, id, '', t);
+// 0:28 – Closing: the copilot and what comes next
+function sClose(lt, t) {
+  const k = .55;
+  sky(k, t); hills(0, k); ground(0, k);
+  lander(1100, terrainY(1100));
+  const x = lerp(820, 960, clamp(lt / 2));
+  ctx.save(); ctx.strokeStyle = 'rgba(108,194,143,.95)'; ctx.lineWidth = 6; ctx.setLineDash([14, 12]); ctx.lineDashOffset = -t * 30;
+  ctx.shadowColor = 'rgba(108,194,143,.8)'; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.moveTo(620, 600); ctx.quadraticCurveTo(900, 520, 1100, terrainY(1100) - 50); ctx.stroke(); ctx.restore();
+  astronaut(x, terrainY(x) - Math.abs(Math.sin(x / 22)) * 6, 1.05, { walk: x / 22 });
+  ctx.fillStyle = 'rgba(12,9,8,.84)'; rr(48, 60, 740, 420, 14); ctx.fill();
+  glowText('ATHENEA', 80, 170, 104, '#ff9a62', 'rgba(255,154,98,.85)', 1);
+  wrap("your copilot for turning Mars's unknown into a safe path.", 84, 236, 660, 36, '#fff', 1.22, 800);
+  text('Space reach guaranteed.', 84, 360, 22, '#ffd166', { weight: 700 });
+  ['Any landing site', 'Artemis · Moon', 'Field work on Earth'].forEach((s, i) => {
+    ctx.globalAlpha = fadeIn(lt, .3 + i * .25, .3);
+    ctx.font = '700 15px "Segoe UI", system-ui, sans-serif'; const w = ctx.measureText(s).width + 24;
+    const cx = 84 + [0, 190, 360][i];
+    ctx.fillStyle = 'rgba(108,194,143,.18)'; rr(cx, 392, w, 32, 16); ctx.fill();
+    ctx.strokeStyle = '#6cc28f'; ctx.lineWidth = 1.5; rr(cx, 392, w, 32, 16); ctx.stroke();
+    text(s, cx + 12, 413, 15, '#bff0d4', { weight: 700 });
   });
-  ctx.globalAlpha = fadeIn(lt, 6.5, .6);
-  text('ATHENEA', 860, 140, 64, '#ff9a62', { weight: 800 });
-  text('Plan every step.', 864, 180, 22, '#fff', { weight: 500 });
   ctx.globalAlpha = 1;
+  text(`Team ${TEAM.name} · ${TEAM.place} · NASA Space Apps`, 84, 458, 16, '#e8d6cc', { weight: 500 });
+  hotspot(760, 408, 'future', '', t);
 }
 
-const DRAW = [sTeam, sChallenge, sSolution, sHow, sFuture];
+// ================= render =================
 const sceneAt = t => { let i = 0; while (i + 1 < SCENES.length && t >= SCENES[i + 1].t) i++; return i; };
-
 let cc = true;
 function render(t) {
   hot = [];
-  const i = sceneAt(t), lt = t - SCENES[i].t;
-  ctx.save(); DRAW[i](lt, t); ctx.restore();
-  if (i > 0 && lt < .3) { ctx.fillStyle = `rgba(0,0,0,${1 - lt / .3})`; ctx.fillRect(0, 0, W, H); }
+  const i = sceneAt(t), sc = SCENES[i], lt = t - sc.t;
+  ctx.save();
+  if (sc.id === 'hook' && lt > 1.3 && lt < 1.8) ctx.translate((rnd(t * 97) - .5) * 18, (rnd(t * 53) - .5) * 14);
+  sc.draw(lt, t);
+  ctx.restore();
+  if (i > 0 && lt < .25) { ctx.fillStyle = `rgba(0,0,0,${1 - lt / .25})`; ctx.fillRect(0, 0, W, H); }
   const nxt = SCENES[i + 1] ? SCENES[i + 1].t : DUR + 10;
-  if (nxt - t < .2) { ctx.fillStyle = `rgba(0,0,0,${1 - (nxt - t) / .2})`; ctx.fillRect(0, 0, W, H); }
-  // slot badge (matches the Space Apps structure)
+  if (nxt - t < .15) { ctx.fillStyle = `rgba(0,0,0,${1 - (nxt - t) / .15})`; ctx.fillRect(0, 0, W, H); }
   ctx.fillStyle = 'rgba(0,0,0,.55)'; rr(W - 250, H - 128, 230, 34, 8); ctx.fill();
-  text(`${SCENES[i].slot} · ${SCENES[i].name}`, W - 135, H - 105, 15, '#ffd166', { align: 'center', weight: 700 });
+  text(`${fmt(sc.t)} · ${sc.name}`, W - 135, H - 105, 15, '#ffd166', { align: 'center', weight: 700 });
   if (cc) {
     const s = SUBS.find(([a, b]) => t >= a && t < b);
     if (s) {
-      ctx.font = '500 26px "Segoe UI", system-ui, sans-serif';
-      const w = ctx.measureText(s[2]).width + 36;
-      ctx.fillStyle = 'rgba(0,0,0,.72)'; rr(W / 2 - w / 2, H - 78, w, 46, 8); ctx.fill();
-      text(s[2], W / 2, H - 46, 26, '#fff', { align: 'center', weight: 500 });
+      ctx.font = '500 24px "Segoe UI", system-ui, sans-serif';
+      // long lines wrap into as many rows as needed (max 1100 px wide)
+      const rows = []; let row = '';
+      for (const w of s[2].split(' ')) { const test = row ? row + ' ' + w : w; if (ctx.measureText(test).width > 1100 && row) { rows.push(row); row = w; } else row = test; }
+      if (row) rows.push(row);
+      const w = Math.max(...rows.map(r => ctx.measureText(r).width)) + 36, h = 18 + rows.length * 30;
+      ctx.fillStyle = 'rgba(0,0,0,.72)'; rr(W / 2 - w / 2, H - 32 - h, w, h, 8); ctx.fill();
+      rows.forEach((r, j) => text(r, W / 2, H - 32 - h + 34 + j * 30, 24, '#fff', { align: 'center', weight: 500 }));
     }
   }
 }
 
-// ---------- player ----------
+// ================= voice narration (browser speech synthesis) =================
+const synth = window.speechSynthesis || null;
+let voiceOn = !!synth, narrator = null, spoken = new Set();
+function pickVoice() {
+  const vs = synth.getVoices().filter(v => /^en[-_]/i.test(v.lang));
+  narrator = vs.find(v => v.localService && /Microsoft Zira/i.test(v.name))
+    || vs.find(v => v.localService && /en[-_]US/i.test(v.lang))
+    || vs.find(v => v.localService)
+    || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
+}
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+// Sync: the picture never runs ahead of the voice. Each line speaks during its scene window; if the voice
+// is still talking when the next line is due, the picture holds its last frame until the line ends.
+// The shorter script fits the 30-second timeline at a natural, constant speaking rate.
+let speaking = -1, speakStart = 0;
+const lineWindow = i => (i + 1 < NARRATION.length ? NARRATION[i + 1][0] : DUR) - NARRATION[i][0];
+function narrate() {
+  if (!synth || !voiceOn || !playing || speaking >= 0) return;
+  const i = NARRATION.findIndex(([at], k) => t >= at && !spoken.has(k));
+  if (i < 0) return;
+  spoken.add(i);
+  const u = new SpeechSynthesisUtterance(NARRATION[i][1]);
+  if (narrator) u.voice = narrator;
+  u.lang = 'en-US'; u.rate = 1;
+  u.onstart = () => { speakStart = performance.now(); };
+  u.onend = u.onerror = () => {
+    if (speaking !== i) return;
+    speaking = -1;
+  };
+  speaking = i; speakStart = performance.now();
+  synth.speak(u);
+}
+// How far the picture may advance: up to the next line's start while the current line is still being spoken.
+function voiceHold() {
+  if (speaking < 0 || !voiceOn) return Infinity;
+  if ((performance.now() - speakStart) / 1000 > lineWindow(speaking) + 6) return Infinity; // safety if the browser never reports the end
+  const next = speaking + 1 < NARRATION.length ? NARRATION[speaking + 1][0] : DUR;
+  return next - .05;
+}
+function resetNarration() {
+  speaking = -1;
+  if (synth) synth.cancel();
+  spoken = new Set(NARRATION.map(([at], i) => at < t - .4 ? i : -1).filter(i => i >= 0));
+}
+
+// ================= music =================
+// Original ambient score generated with Web Audio, or a local file in video/music/ (ignored by git so
+// copyrighted tracks are never committed or published with the repository).
+const CHORDS = [[0, [45, 52, 57, 60, 64]], [7.5, [41, 48, 57, 60, 65]], [15, [48, 55, 60, 64, 67]], [22.5, [43, 50, 59, 62, 67]]];
+const STAR_NOTES = [76, 79, 81, 84, 88];
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+const MUSIC_FILE = 'music/soundtrack.mp3';
+const MUSIC_START = 70; // seconds into the track where the video's music begins (the first minute of soundtrack.mp3 is very quiet)
+let musicOn = true, ac = null, master = null, direct = null, musicDest = null, bus = null, fileBuffer = null;
+function audioSetup() {
+  if (ac) return;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  ac = new AC();
+  master = ac.createGain(); master.gain.value = 0.16;
+  const len = ac.sampleRate * 3.5, ir = ac.createBuffer(2, len, ac.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
+  const verb = ac.createConvolver(); verb.buffer = ir;
+  const wet = ac.createGain(); wet.gain.value = 0.55;
+  musicDest = ac.createMediaStreamDestination();
+  master.connect(ac.destination); master.connect(verb); verb.connect(wet); wet.connect(ac.destination);
+  master.connect(musicDest); wet.connect(musicDest);
+  direct = ac.createGain(); direct.gain.value = 0.55;
+  direct.connect(ac.destination); direct.connect(musicDest);
+}
+function pad(out, freq, start, end, level) {
+  const g = ac.createGain(), f = ac.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 1100; f.Q.value = .4;
+  g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(level, start + 2.2);
+  g.gain.setValueAtTime(level, Math.max(start + 2.2, end - 2.5)); g.gain.linearRampToValueAtTime(0, end);
+  f.connect(g); g.connect(out);
+  [-6, 0, 6].forEach(det => { const o = ac.createOscillator(); o.type = det ? 'sawtooth' : 'triangle'; o.frequency.value = freq; o.detune.value = det; o.connect(f); o.start(start); o.stop(end + .1); });
+}
+function star(out, freq, start) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(.05, start + .05); g.gain.exponentialRampToValueAtTime(.0005, start + 2.5);
+  o.connect(g); g.connect(out); o.start(start); o.stop(start + 2.6);
+}
+function startMusic(from) {
+  stopMusic(.05);
+  if (!musicOn) return;
+  audioSetup(); if (!ac) return;
+  if (ac.state === 'suspended') ac.resume();
+  const now = ac.currentTime + .05, at = s => now + Math.max(0, s - from);
+  if (fileBuffer) {
+    bus = ac.createGain(); bus.connect(direct);
+    // no scheduled fade-out: the picture may wait for the voice, so finish() fades the music when the video really ends
+    bus.gain.setValueAtTime(0, now); bus.gain.linearRampToValueAtTime(1, now + (from < .5 ? 1.2 : .3));
+    const src = ac.createBufferSource(); src.buffer = fileBuffer; src.connect(bus);
+    src.start(now, Math.min(fileBuffer.duration - .1, MUSIC_START + from));
+    bus._src = src;
+    return;
+  }
+  bus = ac.createGain(); bus.gain.value = 1; bus.connect(master);
+  CHORDS.forEach(([s, notes], i) => {
+    const e = i + 1 < CHORDS.length ? CHORDS[i + 1][0] + 1.5 : DUR + 10; // last chord rings on in case the picture waits for the voice
+    if (e <= from) return;
+    notes.forEach((m, kk) => pad(bus, midiHz(m), at(s), at(e), kk === 0 ? .2 : .085));
+    pad(bus, midiHz(notes[0] - 12), at(s), at(e), .12);
+  });
+  for (let s = 1.5; s < DUR; s += 2.25) if (s >= from) star(bus, midiHz(STAR_NOTES[Math.floor(rnd(s * 10) * STAR_NOTES.length)]), at(s));
+}
+function stopMusic(fade = .4) {
+  if (!bus) return;
+  const b = bus; bus = null;
+  b.gain.cancelScheduledValues(ac.currentTime);
+  b.gain.setValueAtTime(b.gain.value, ac.currentTime);
+  b.gain.linearRampToValueAtTime(0, ac.currentTime + fade);
+  if (b._src) b._src.stop(ac.currentTime + fade + .05);
+  setTimeout(() => b.disconnect(), fade * 1000 + 200);
+}
+async function useMusicBytes(bytes, label) {
+  audioSetup(); if (!ac) return;
+  fileBuffer = await ac.decodeAudioData(bytes);
+  $('muSrc').textContent = `Music: ${label} (local file)`;
+  if (playing) startMusic(t);
+}
+
+// ================= player =================
 const $ = id => document.getElementById(id);
-let t = 0, playing = false, last = 0, recorder = null;
+let t = 0, playing = false, last = 0, recorder = null, endTimer = null;
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
-const chapterBtns = SCENES.map((s, i) => {
+const chapterBtns = SCENES.map(s => {
   const b = document.createElement('button');
-  b.innerHTML = `<b>${s.slot}</b>${s.name}`;
-  b.onclick = () => { closeTip(); $('end').hidden = true; seek(s.t + .01); play(); };
+  b.innerHTML = `<b>${fmt(s.t)}</b>${s.name}`;
+  b.onclick = () => { closeTip(); hideEnd(); seek(s.t + .01); play(); };
   $('chapters').appendChild(b); return b;
 });
-
 function ui() {
   $('play').textContent = playing ? '❚❚' : '▶';
   $('play').setAttribute('aria-label', playing ? 'Pause' : 'Play');
@@ -775,28 +798,27 @@ function ui() {
   $('time').textContent = `${fmt(t)} / ${fmt(DUR)}`;
   const i = sceneAt(t); chapterBtns.forEach((b, j) => b.classList.toggle('on', j === i));
 }
+function hideEnd() { clearTimeout(endTimer); $('end').hidden = true; }
 function seek(v) { t = clamp(v, 0, DUR); resetNarration(); if (playing) startMusic(t); render(t); ui(); }
-function play() { if (t >= DUR) seek(0); resetNarration(); startMusic(t); $('end').hidden = true; playing = true; last = performance.now(); ui(); }
+function play() { if (t >= DUR) seek(0); resetNarration(); startMusic(t); hideEnd(); playing = true; last = performance.now(); ui(); }
 function pause() { playing = false; if (synth) synth.cancel(); stopMusic(); ui(); }
 function toggle() { playing ? pause() : (closeTip(), play()); }
-
 function loop(now) {
   if (playing) {
-    t += Math.min(.1, (now - last) / 1000); last = now;
+    t = Math.min(t + Math.min(.1, (now - last) / 1000), Math.max(t, voiceHold())); last = now;
     narrate();
-    if (t >= DUR) { t = DUR; playing = false; finish(); }
+    if (t >= DUR && speaking < 0) { t = DUR; playing = false; finish(); }
     ui();
   }
   render(t);
   requestAnimationFrame(loop);
 }
-
 function finish() {
   stopMusic(1.5);
   if (recorder) { setTimeout(() => recorder && recorder.stop(), 300); return; }
-  $('end').hidden = false;
+  // let the closing line finish before the quiz covers it
+  endTimer = setTimeout(() => { $('end').hidden = false; }, 2500);
 }
-
 function openTip(id) {
   pause();
   const [title, body] = TIPS[id];
@@ -807,40 +829,26 @@ function openTip(id) {
 function closeTip() { $('tip').hidden = true; }
 $('tipGo').onclick = () => { closeTip(); play(); };
 
-function canvasPoint(e) {
-  const r = cv.getBoundingClientRect();
-  return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height];
-}
+function canvasPoint(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; }
 const hit = (x, y) => hot.find(h => Math.hypot(h.x - x, h.y - y) < h.r);
 cv.addEventListener('mousemove', e => { cv.style.cursor = !recorder && hit(...canvasPoint(e)) ? 'pointer' : 'default'; });
-cv.addEventListener('click', e => {
-  if (recorder) return;
-  const h = hit(...canvasPoint(e));
-  h ? openTip(h.id) : toggle();
-});
+cv.addEventListener('click', e => { if (recorder) return; const h = hit(...canvasPoint(e)); h ? openTip(h.id) : toggle(); });
 
 $('play').onclick = toggle;
-$('seek').oninput = e => { closeTip(); $('end').hidden = true; pause(); seek(e.target.value / 10); };
+$('seek').oninput = e => { closeTip(); hideEnd(); pause(); seek(e.target.value / 10); };
 $('cc').onclick = () => { cc = !cc; $('cc').setAttribute('aria-pressed', cc); render(t); };
 if (!synth) { $('vo').hidden = true; $('voNote').textContent = 'This browser has no speech synthesis, so the voice narration is not available.'; }
+$('vo').onclick = () => { voiceOn = !voiceOn; $('vo').setAttribute('aria-pressed', voiceOn); $('vo').textContent = voiceOn ? '🔊 Voice' : '🔇 Voice'; resetNarration(); };
 if (!(window.AudioContext || window.webkitAudioContext)) $('mu').hidden = true;
+$('mu').onclick = () => { musicOn = !musicOn; $('mu').setAttribute('aria-pressed', musicOn); $('mu').textContent = musicOn ? '♪ Music' : '♪̸ Music'; if (!musicOn) stopMusic(); else if (playing) startMusic(t); };
 $('muFile').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   try { await useMusicBytes(await f.arrayBuffer(), f.name); }
   catch { $('muSrc').textContent = `Music: could not read ${f.name}; using the original score`; fileBuffer = null; }
 };
-$('mu').onclick = () => {
-  musicOn = !musicOn;
-  $('mu').setAttribute('aria-pressed', musicOn);
-  $('mu').textContent = musicOn ? '♪ Music' : '♪̸ Music';
-  if (!musicOn) stopMusic(); else if (playing) startMusic(t);
-};
-$('vo').onclick = () => {
-  voiceOn = !voiceOn;
-  $('vo').setAttribute('aria-pressed', voiceOn);
-  $('vo').textContent = voiceOn ? '🔊 Voice' : '🔇 Voice';
-  resetNarration();
-};
+fetch(MUSIC_FILE).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+  .then(b => useMusicBytes(b, 'soundtrack.mp3'))
+  .catch(() => { $('muSrc').textContent = 'Music: original ambient score'; });
 $('fs').onclick = () => { document.fullscreenElement ? document.exitFullscreen() : $('player').requestFullscreen?.(); };
 $('again').onclick = () => { seek(0); play(); };
 document.addEventListener('keydown', e => {
@@ -850,18 +858,17 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft') seek(t - 5);
   else if (e.key.toLowerCase() === 'c') $('cc').click();
 });
-
 $('quiz').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   [...$('quiz').children].forEach(x => x.classList.remove('right', 'wrong'));
   const ok = b.dataset.ok === '1';
   b.classList.add(ok ? 'right' : 'wrong');
   $('quizMsg').textContent = ok
-    ? 'Correct! At every stop Athenea compares the time left with the walk back plus a reserve.'
-    : 'Not quite. Athenea checks the return margin at every stop. Try another answer.';
+    ? 'Correct! At every stop ATHENEA compares the time left with the walk back plus a reserve.'
+    : 'Not quite. ATHENEA checks the return margin at every stop. Try another answer.';
 });
 
-// record to a file
+// record to a file (images + music; the browser voice cannot be captured)
 $('rec').onclick = () => {
   if (musicOn) audioSetup();
   const withMusic = musicOn && !!musicDest;
@@ -870,8 +877,7 @@ $('rec').onclick = () => {
     : ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
   const mime = window.MediaRecorder && types.find(m => MediaRecorder.isTypeSupported(m));
   if (!mime || !cv.captureStream) { $('recMsg').textContent = 'This browser cannot record the video.'; return; }
-  const chunks = [];
-  const stream = cv.captureStream(30);
+  const chunks = [], stream = cv.captureStream(30);
   if (withMusic) musicDest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
   recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6e6 });
   recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
@@ -885,8 +891,8 @@ $('rec').onclick = () => {
     $('recMsg').textContent = `Done: ${a.download} was downloaded.`;
     $('end').hidden = false;
   };
-  closeTip(); $('end').hidden = true; $('rec').disabled = true;
-  $('recMsg').textContent = `Recording 30 seconds… keep this tab visible. The file includes the images${withMusic ? ' and the music' : ''}; to include the voice, record the screen with sound.`;
+  closeTip(); hideEnd(); $('rec').disabled = true;
+  $('recMsg').textContent = `Recording ${DUR} seconds… keep this tab visible. The file includes the images${withMusic ? ' and the music' : ''}; to include the voice, record the screen with sound.`;
   seek(0); recorder.start(); play();
 };
 

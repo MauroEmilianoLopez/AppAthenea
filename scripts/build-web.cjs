@@ -11,6 +11,7 @@ const assets = [
   ['mission.html', 'index.html'],
   ['mission.html', 'mission.html'],
   ['index.html', 'map.html'],
+  ['video/index.html', 'demo.html'],
   ['mission.js', 'mission.js'],
   ['web-terrain.mjs', 'web-terrain.mjs'],
   ['missions.js', 'missions.js'],
